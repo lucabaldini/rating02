@@ -63,6 +63,8 @@ class Publication(object):
         'num_authors'   : int
     }
 
+    MAX_AUTHOR_STRING_LEN = 3800
+
     def __init__(self, row, row_index):
         """Constructor from a row of an excel file.
         """
@@ -76,7 +78,12 @@ class Publication(object):
             if not val:
                 val = None
             self.__setattr__(attr, val)
-        self.unique_id = (self.journal, self.volume_number, )
+        self.truncated = len(self.author_string) >= self.MAX_AUTHOR_STRING_LEN
+
+    def last_author(self):
+        """Return the last author in the author string.
+        """
+        return self.author_string.rsplit(';', 2)[-2].strip()
 
     def __str__(self):
         """String formatting.
@@ -125,6 +132,11 @@ class PublicationList(list):
             return self[index]
         except IndexError:
             return None
+
+    def at_row(self, row_index):
+        """Retrieve the publication at a given row index in the excel file.
+        """
+        return self.at(row_index - 2)
 
     def select(self, quiet=False, **kwargs):
         """Select a subsample of publications based on a given set of

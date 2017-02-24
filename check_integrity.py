@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from rating import load_publication_list, logging
+from rating import load_publication_list, logging, PublicationList
 
 
 PUBS = load_publication_list()
@@ -97,6 +97,11 @@ def check_author_string():
             print_info(pub)
             n += 1
     logging.info('%d suspicisous entries found.\n' % n)
+
+def check_truncated_author_string():
+    """
+    """
+    pub_list = PUBS.select(truncated=True)
     
 
 
@@ -105,4 +110,5 @@ if __name__ == '__main__':
     #check_articles()
     #check_monographies()
     #check_volume()
-    check_author_string()
+    #check_author_string()
+    check_truncated_author_string()
