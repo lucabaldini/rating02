@@ -203,7 +203,7 @@ class PublicationList(list):
         logging.info('Grand-total: %d entries in %d value(s)' %\
                      (sum(val_dict.values()), len(keys)))
         return val_dict
-        
+
 
 
 def load_publication_list():
