@@ -51,16 +51,21 @@ class Publication(object):
         'doi'           : 22,
         'isbn'          : 23,
         'isi'           : 24,
+        'scopus'        : 27,
         'volume'        : 34,
         'journal'       : 35,
         'issn'          : 37,
         'volume_number' : 43,
-        'issue_number'  : 44     
+        'issue_number'  : 44,
+        'wos_jif'       : 94,
+        'wos_j5yif'     : 96
     }
 
     FORMAT_DICT = {
         'year'          : int,
-        'num_authors'   : int
+        'num_authors'   : int,
+        'wos_jif'       : float,
+        'wos_j5yif'     : float
     }
 
     MAX_AUTHOR_STRING_LEN = 3800
@@ -73,7 +78,7 @@ class Publication(object):
             val = row[col].value
             try:
                 val = self.FORMAT_DICT[attr](val)
-            except KeyError:
+            except:
                 val = encode_ascii(val)
             if not val:
                 val = None
@@ -204,6 +209,33 @@ class PublicationList(list):
                      (sum(val_dict.values()), len(keys)))
         return val_dict
 
+    def dump_journal_list(self, file_path):
+        """
+        """
+        logging.info('Dumping journal list...')
+        journal_dict = {}
+        num_mismatches = 0
+        for pub in self:
+            journal = pub.journal
+            if journal is not None:
+                wos_jif = pub.wos_jif
+                if journal_dict.has_key(journal):
+                    try: 
+                        assert wos_jif == journal_dict[journal]
+                    except AssertionError:
+                        num_mismatches += 1
+                        logging.error('IF mismatch @ row %d for %s (%s/%s)' %\
+                                      (pub.row_index, journal, wos_jif,
+                                       journal_dict[journal]))
+                else:
+                    journal_dict[journal] = wos_jif
+        logging.info('%d mismatch(es) found.' % num_mismatches)
+        keys = journal_dict.keys()
+        keys.sort()
+        for journal in keys:
+            print journal, journal_dict[journal]
+
+
 
 
 def load_publication_list():
@@ -216,3 +248,4 @@ def load_publication_list():
 if __name__ == '__main__':
     pub_list = load_publication_list()
     pub_list.unique_values('pub_type')
+    pub_list.dump_journal_list(None)

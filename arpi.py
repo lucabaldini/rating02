@@ -38,7 +38,10 @@ def retrieve_num_authors(handle):
     socket = open_handle(handle)
     for line in socket:
         if 'dc.description.numberofauthors' in line:
-            return int(line.split('</td><td')[-2].split('>')[-1])
+            try:
+                return int(line.split('</td><td')[-2].split('>')[-1])
+            except:
+                print('Error for handle %s: "%s"' % (handle, line))
 
 def dump_num_authors(output_file_path='author_dump.txt'):
     """
@@ -52,8 +55,8 @@ def dump_num_authors(output_file_path='author_dump.txt'):
     output_file = open(output_file_path, 'w')
     for handle in handle_list:
         num_authors = retrieve_num_authors(handle)
-        print('%s -> %d' % (handle, num_authors))
-        output_file.write('%s %d\n' % (handle, num_authors))
+        print('%s -> %s' % (handle, num_authors))
+        output_file.write('%s %s\n' % (handle, num_authors))
 
 
 if __name__ == '__main__':
