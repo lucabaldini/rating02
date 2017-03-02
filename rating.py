@@ -218,17 +218,25 @@ class PublicationList(list):
         for pub in self:
             journal = pub.journal
             if journal is not None:
-                wos_jif = pub.wos_jif
+                # Retrieve IF and year.
+                jif = pub.wos_jif
+                year = pub.year
+                # Journal already in the dict?
                 if journal_dict.has_key(journal):
-                    try: 
-                        assert wos_jif == journal_dict[journal]
-                    except AssertionError:
-                        num_mismatches += 1
-                        logging.error('IF mismatch @ row %d for %s (%s/%s)' %\
-                                      (pub.row_index, journal, wos_jif,
-                                       journal_dict[journal]))
+                    entry = journal_dict[journal]
+                    if entry.has_key(year):
+                        try:
+                            assert jif == entry[year]
+                        except AssertionError:
+                            num_mismatches += 1
+                            logging.error('IF mismatch @ row %d for %s' %\
+                                          (pub.row_index, journal))
+                            logging.error('Year %d, exp. %s, obs. %s' %\
+                                          (year, entry[year], jif))
+                    else:
+                        entry[year] = jif
                 else:
-                    journal_dict[journal] = wos_jif
+                    journal_dict[journal] = {year: jif}
         logging.info('%d mismatch(es) found.' % num_mismatches)
         keys = journal_dict.keys()
         keys.sort()
