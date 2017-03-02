@@ -399,6 +399,11 @@ class PublicationList(list):
                     worksheet.write(row + 1, col + 1, value)
             workbook.save(file_path)
             logging.info('Done.')
+
+    def dump_pubs_no_doi(self, file_path):
+        """Dump a list of publications with no DOI.
+        """
+        pass
        
 
 
