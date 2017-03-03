@@ -110,5 +110,5 @@ if __name__ == '__main__':
     #check_articles()
     #check_monographies()
     #check_volume()
-    #check_author_string()
-    check_truncated_author_string()
+    check_author_string()
+    #check_truncated_author_string()

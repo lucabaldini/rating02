@@ -23,7 +23,7 @@ import xlwt
 import logging
 logging.basicConfig(format='>>> %(message)s', level=logging.DEBUG)
 
-
+ 
 
 def encode_ascii(unicode_string):
     """Encode a unicode string to ascii.
@@ -91,13 +91,26 @@ class Publication(object):
         """
         return self.author_string.rsplit(';', 2)[-2].strip()
 
+    def author(self):
+        """Concatenate the author name and surname.
+        """
+        return '%s, %s.' % (self.author_surname, self.author_name[:1])
+
+    def write(self, worksheet, row):
+        """Write the basic article info to a worksheet.
+        """
+        cells = [self.handle, self.row_index, self.author(), self.title,
+                 self.author_string, self.num_authors,
+                 self.journal or self.volume, self.year, self.doi, self.wos_jif]
+        for col, value in enumerate(cells):
+            worksheet.write(row, col, value)
+
     def __str__(self):
         """String formatting.
         """
-        return '[%s @ row %d for %s %s.], "%s", %s (%d)' %\
-            (self.pub_type, self.row_index, self.author_surname,
-             self.author_name[:1], self.title, self.journal or self.volume,
-             self.year)
+        return '[%s @ row %d for %s], "%s", %s (%d)' %\
+            (self.pub_type, self.row_index, self.author(), self.title,
+             self.journal or self.volume, self.year)
 
 
 
@@ -163,6 +176,18 @@ class PublicationList(list):
                 selection.append(pub)
         if not quiet:
             logging.info('Done, %d item(s) selected.' % len(selection))
+        return selection
+
+    def select_journal_pubs(self, quiet=False, **kwargs):
+        """Select all the publications on a journal (i.e., where the journal
+        field is not None).
+        """
+        selection = PublicationList()
+        for pub in self:
+            if pub.journal is not None:
+                selection.append(pub)
+        if kwargs != {}:
+            selection = selection.select(quiet, **kwargs)
         return selection
 
     def match_title(self, pattern, **kwargs):
@@ -403,9 +428,33 @@ class PublicationList(list):
     def dump_pubs_no_doi(self, file_path):
         """Dump a list of publications with no DOI.
         """
-        pass
-       
+        logging.info('Dumping the list of publications with no DOI...')
+        selection = self.select_journal_pubs(doi=None)
+        workbook = xlwt.Workbook()
+        worksheet = workbook.add_sheet('Articoli no DOI')
+        for row, pub in enumerate(selection):
+            pub.write(worksheet, row)
+        workbook.save(file_path)
+        logging.info('Done.')
 
+    def dump_pubs_with_suspect_author_list(self, file_path):
+        """
+        """
+        logging.info('Dumping publications with suspect author list...')
+        
+        workbook = xlwt.Workbook()
+        worksheet = workbook.add_sheet('Articoli sospetti')
+        row = 1
+        for pub in self:
+            authors = pub.author_string.lower()
+            if 'et al' in authors or 'author' in authors or \
+               'collaboration' in authors and pub.num_authors < 50:
+                pub.write(worksheet, row)
+                row += 1
+        workbook.save(file_path)
+        logging.info('Done.')
+
+        
 
 def load_publication_list():
     """Load the publication list from the excel file.
@@ -419,4 +468,6 @@ if __name__ == '__main__':
     #pub_list.unique_values('pub_type')
     #pub_list.dump_journal_list('py_lista_riviste.xls')
     #pub_list.dump_doi_duplicates('py_duplicati_doi.xls')
-    pub_list.dump_nojif_journals('py_riviste_no_doi.xls')
+    #pub_list.dump_nojif_journals('py_riviste_no_doi.xls')
+    #pub_list.dump_pubs_no_doi('py_articoli_no_doi.xls')
+    pub_list.dump_pubs_with_suspect_author_list('py_articoli_lista_autori_sospetta.xls')
