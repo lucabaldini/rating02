@@ -330,7 +330,9 @@ class PublicationList(list):
             doi = pub.doi
             if doi is not None:
                 handle = pub.handle
-                author = '%s %s.' % (pub.author_surname, pub.author_name[:1])
+                author = '%s %s @ row %d.' %\
+                         (pub.author_surname, pub.author_name[:1],
+                          pub.row_index)
                 if handle_dict.has_key(handle):
                     handle_dict[handle].append(author)
                 else:
@@ -441,7 +443,14 @@ class PublicationList(list):
         """
         """
         logging.info('Dumping publications with suspect author list...')
-        
+        author_dict = {}
+        for line in open('author_dump.txt'):
+            handle, num_authors = line.strip('\n').split()
+            try:
+                num_authors = int(num_authors)
+            except:
+                num_authors = 0
+            author_dict[handle] = num_authors
         workbook = xlwt.Workbook()
         worksheet = workbook.add_sheet('Articoli sospetti')
         row = 1
@@ -450,6 +459,7 @@ class PublicationList(list):
             if 'et al' in authors or 'author' in authors or \
                'collaboration' in authors and pub.num_authors < 50:
                 pub.write(worksheet, row)
+                worksheet.write(row, 10, author_dict[pub.handle])
                 row += 1
         workbook.save(file_path)
         logging.info('Done.')
