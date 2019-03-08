@@ -23,13 +23,14 @@ import xlwt
 import logging
 logging.basicConfig(format='>>> %(message)s', level=logging.DEBUG)
 
- 
 
 def encode_ascii(unicode_string):
     """Encode a unicode string to ascii.
     """
     return unicode_string.encode('ascii', 'replace').replace('\n', '')
 
+
+DB_FILE_PATH = '../a02_pubblicazioni.xlsx'
 
 
 class Publication(object):
@@ -39,27 +40,18 @@ class Publication(object):
 
     FIELD_DICT = {
         'handle'        : 0,
-        'author_surname': 1,
-        'author_name'   : 2,
-        'year'          : 3,
-        'title'         : 4,
-        'pub_type'      : 5,
-        'relevance'     : 6,
-        'refereeing'    : 7,
-        'ssd'           : 9,
-        'author_string' : 18,
-        'num_authors'   : 19,
-        'doi'           : 22,
-        'isbn'          : 23,
-        'isi'           : 24,
-        'scopus'        : 27,
-        'volume'        : 34,
-        'journal'       : 35,
-        'issn'          : 37,
-        'volume_number' : 43,
-        'issue_number'  : 44,
-        'wos_jif'       : 94,
-        'wos_j5yif'     : 96
+        'author_surname': 8,
+        'author_name'   : 7,
+        'year'          : 1,
+        'title'         : 2,
+        'pub_type'      : 3,
+        'author_string' : 30,
+        'num_authors'   : 31,
+        'doi'           : 38,
+        'volume'        : 64,
+        'journal'       : 54,
+        'wos_jif'       : 124,
+        'wos_j5yif'     : 129
     }
 
     FORMAT_DICT = {
@@ -126,7 +118,7 @@ class PublicationList(list):
         list.__init__(self)
         if file_path is not None:
             logging.info('Opening excel file %s...' % file_path)
-            self.workbook = xlrd.open_workbook('Area 02 pubblicazioni.xls')
+            self.workbook = xlrd.open_workbook(file_path)
             logging.info('Loading sheet at index %d...' % sheet_index)
             self.sheet = self.workbook.sheet_by_index(sheet_index)
             logging.info('Done, %d column(s) by %d row(s) found.' %\
@@ -469,15 +461,15 @@ class PublicationList(list):
 def load_publication_list():
     """Load the publication list from the excel file.
     """
-    return PublicationList('Area 02 pubblicazioni.xls')
+    return PublicationList('../a02_pubblicazioni.xlsx')
 
 
 
 if __name__ == '__main__':
-    pub_list = load_publication_list()
+    pub_list = load_publication_list()    
     #pub_list.unique_values('pub_type')
     #pub_list.dump_journal_list('py_lista_riviste.xls')
     #pub_list.dump_doi_duplicates('py_duplicati_doi.xls')
     #pub_list.dump_nojif_journals('py_riviste_no_doi.xls')
     #pub_list.dump_pubs_no_doi('py_articoli_no_doi.xls')
-    pub_list.dump_pubs_with_suspect_author_list('py_articoli_lista_autori_sospetta.xls')
+    #pub_list.dump_pubs_with_suspect_author_list('py_articoli_lista_autori_sospetta.xls')
