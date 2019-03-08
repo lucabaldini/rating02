@@ -41,14 +41,15 @@ class Product(object):
 
     FIELD_DICT = {
         'handle'        : 0,
-        'author_surname': 8,
-        'author_name'   : 7,
         'year'          : 1,
         'title'         : 2,
         'pub_type'      : 3,
+        'author_name'   : 7,
+        'author_surname': 8,
         'author_string' : 30,
         'num_authors'   : 31,
         'doi'           : 38,
+        'isbn'          : 40,
         'volume'        : 64,
         'journal'       : 54,
         'wos_jif'       : 124,

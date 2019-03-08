@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2017, Luca Baldini.
+# Copyright (C) 2017--2019, Luca Baldini.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,6 +92,6 @@ def check_author_string():
 if __name__ == '__main__':
     check_journal()
     check_article_doi()
-    #check_monography_isbn()
+    check_monography_isbn()
     check_author_string()
 
