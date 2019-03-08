@@ -19,23 +19,20 @@
 
 import xlwt
 
-from rating import load_db, logging
+from rating import load_db_prod, dump_excel_table, logging
 
 
 
 def dump_doi_duplicates(file_path=None):
     """Dump a list of papers with the same DOI and different unique handles.
     """
-    db = load_db()
-        
+    db = load_db_prod()
     logging.info('Dumping DOI duplicates...')
-
     # Some bookkeeping variables.
     handle_dict = {}
     doi_dict = {}
     num_errors = 0
     error_doi_list = []
-
     #Start the loop.
     for pub in db:
         doi = pub.doi
@@ -60,25 +57,16 @@ def dump_doi_duplicates(file_path=None):
 
     # Write the output file.
     if file_path is not None:
-        logging.info('Writing output file %s...' % file_path)
-        workbook = xlwt.Workbook()
-        worksheet = workbook.add_sheet('Duplicati DOI')
-        cells = ['DOI',
-                 'Handle 1',
-                 'Handle 2',
-                 'Handle 3',
-                 'Handle 4',
-                 'Handle 5'
-        ]
-        for col, value in enumerate(cells):
-            worksheet.write(0, col, value)
+        col_names = ['DOI', 'Handle 1', 'Handle 2', 'Handle 3', 'Handle 4']
+        rows = []
         for i, doi in enumerate(error_doi_list):
-            worksheet.write(i + 1, 0, doi)
+            row = [doi]
             for col, value in enumerate(doi_dict[doi]):
                 value = '%s %s' % (value, handle_dict[value])
-                worksheet.write(i + 1, col + 1, value)
-        workbook.save(file_path)
-        logging.info('Done.')
+                row.append(value)
+            rows.append(row)
+        dump_excel_table(file_path, 'Duplicati DOI', col_names, rows)
+        
 
 
 if __name__ == '__main__':

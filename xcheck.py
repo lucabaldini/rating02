@@ -17,10 +17,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from rating import load_db, logging, ProductDatabase
+from rating import load_db_prod, logging, ProductDatabase
 
 
-DB = load_db()
+DB = load_db_prod()
+
+
+def basic_info():
+    """
+    """
+    vals = DB.unique_values('pub_type')
+    books = DB.select(pub_type='3.1 Monografia o trattato scientifico')
+    for book in books:
+        print(book)
+    others = DB.select(pub_type='5.12 Altro')
+    for item in others:
+        print(item)
 
 
 def check_journal():
@@ -90,8 +102,9 @@ def check_author_string():
 
 
 if __name__ == '__main__':
+    basic_info()
     check_journal()
-    check_article_doi()
+    #check_article_doi()
     check_monography_isbn()
-    check_author_string()
+    #check_author_string()
 

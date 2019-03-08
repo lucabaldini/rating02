@@ -30,7 +30,7 @@ def encode_ascii(unicode_string):
     return unicode_string.encode('ascii', 'replace').replace('\n', '')
 
 
-def dump_excel_table(file_path, worksheet_name, col_names, data):
+def dump_excel_table(file_path, worksheet_name, col_names, rows):
     """
     """
     logging.info('Writing data table to %s...' % file_path)
@@ -38,14 +38,18 @@ def dump_excel_table(file_path, worksheet_name, col_names, data):
     worksheet = workbook.add_sheet(worksheet_name)
     for col, name in enumerate(col_names):
         worksheet.write(0, col, name)
-    # Write data.
-
-    # 
+    for i, row in enumerate(rows):
+        for j, val in enumerate(row):
+            worksheet.write(i + 1, j, val)
     workbook.save(file_path)
     logging.info('Done.')
 
 
-DB_FILE_PATH = '../a02_pubblicazioni.xlsx'
+
+
+DB_PROD_FILE_PATH = 'db_prodotti.xlsx'
+DB_PERS_FILE_PATH = 'db_persone.xlsx'
+
 
 
 class Product(object):
@@ -215,7 +219,7 @@ class Product(object):
         """String formatting.
         """
         return '[%s @ row %d for %s], "%s" (%d)' %\
-            (self.pub_type, self.row_index, self.author(), self.title,
+            (self.pub_type[:4], self.row_index, self.author(), self.title,
              self.year)
 
 
@@ -521,19 +525,13 @@ class ProductDatabase(list):
 
         
 
-def load_db():
+def load_db_prod():
     """Load the publication list from the excel file.
     """
-    return ProductDatabase('../a02_pubblicazioni.xlsx')
+    return ProductDatabase(DB_PROD_FILE_PATH)
 
 
-
-if __name__ == '__main__':
-    db = load_db()
-    vals = db.unique_values('pub_type')
-    books = db.select(pub_type='3.1 Monografia o trattato scientifico')
-    for book in books:
-        print(book)
-    others = db.select(pub_type='5.12 Altro')
-    for item in others:
-        print(item)
+def load_db_pers():
+    """Load the personnel DB from the excel file.
+    """
+    return None
