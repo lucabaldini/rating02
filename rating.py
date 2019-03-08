@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2017, Luca Baldini.
+# Copyright (C) 2017--2019, Luca Baldini.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ def encode_ascii(unicode_string):
 DB_FILE_PATH = '../a02_pubblicazioni.xlsx'
 
 
-class Publication(object):
+class Product(object):
 
     """Class representing a publication.
     """
@@ -207,9 +207,9 @@ class Publication(object):
 
 
 
-class PublicationList(list):
+class ProductDatabase(list):
 
-    """Utility class representing the full list of Publication objects from the
+    """Utility class representing the full list of Product objects from the
     publication excel file.
     """
 
@@ -228,12 +228,12 @@ class PublicationList(list):
 
     def __parse(self, num_rows=None):
         """Parse the content of the file and fill a comprehesive list
-        of Publication objects.
+        of Product objects.
         """
         logging.info('Parsing file information...')
         num_rows = num_rows or self.sheet.nrows
         for i in range(1, num_rows):
-            pub = Publication(self.sheet.row(i), i + 1)
+            pub = Product(self.sheet.row(i), i + 1)
             self.append(pub)
         logging.info('Done, %d row(s) parsed.' % num_rows)
 
@@ -258,7 +258,7 @@ class PublicationList(list):
             return self
         if not quiet:
             logging.info('Selecting publications with %s...' % kwargs)
-        selection = PublicationList()
+        selection = ProductDatabase()
         for pub in self:
             accept = True
             for (attr, val) in kwargs.items():
@@ -275,7 +275,7 @@ class PublicationList(list):
         """Select all the publications on a journal (i.e., where the journal
         field is not None).
         """
-        selection = PublicationList()
+        selection = ProductDatabase()
         for pub in self:
             if pub.journal is not None:
                 selection.append(pub)
@@ -288,7 +288,7 @@ class PublicationList(list):
         """
         logging.info('Selecting titles matching "%s" with %s...' %\
                      (pattern, kwargs))
-        selection = PublicationList()
+        selection = ProductDatabase()
         for pub in self.select(True, **kwargs):
             if pattern.lower() in pub.title.lower():
                 selection.append(pub)
@@ -300,7 +300,7 @@ class PublicationList(list):
         """
         logging.info('Selecting author strings matching "%s" with %s...' %\
                      (pattern, kwargs))
-        selection = PublicationList()
+        selection = ProductDatabase()
         for pub in self.select(True, **kwargs):
             if pattern.lower() in pub.author_string.lower():
                 selection.append(pub)
@@ -559,20 +559,20 @@ class PublicationList(list):
 
         
 
-def load_publication_list():
+def load_db():
     """Load the publication list from the excel file.
     """
-    return PublicationList('../a02_pubblicazioni.xlsx')
+    return ProductDatabase('../a02_pubblicazioni.xlsx')
 
 
 
 if __name__ == '__main__':
-    pub_list = load_publication_list()    
-    pub_list.unique_values('pub_type')
-    books = pub_list.select(pub_type='3.1 Monografia o trattato scientifico')
+    db = load_db()
+    vals = db.unique_values('pub_type')
+    books = db.select(pub_type='3.1 Monografia o trattato scientifico')
     for book in books:
         print(book)
-    others = pub_list.select(pub_type='5.12 Altro')
+    others = db.select(pub_type='5.12 Altro')
     for item in others:
         print(item)
     
