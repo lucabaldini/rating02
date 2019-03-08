@@ -35,7 +35,8 @@ DB_FILE_PATH = '../a02_pubblicazioni.xlsx'
 
 class Product(object):
 
-    """Class representing a publication.
+    """Class representing a generic product (i.e., a row in the input excel
+    file).
     """
 
     FIELD_DICT = {
