@@ -30,6 +30,21 @@ def encode_ascii(unicode_string):
     return unicode_string.encode('ascii', 'replace').replace('\n', '')
 
 
+def dump_excel_table(file_path, worksheet_name, col_names, data):
+    """
+    """
+    logging.info('Writing data table to %s...' % file_path)
+    workbook = xlwt.Workbook()
+    worksheet = workbook.add_sheet(worksheet_name)
+    for col, name in enumerate(col_names):
+        worksheet.write(0, col, name)
+    # Write data.
+
+    # 
+    workbook.save(file_path)
+    logging.info('Done.')
+
+
 DB_FILE_PATH = '../a02_pubblicazioni.xlsx'
 
 
@@ -522,8 +537,3 @@ if __name__ == '__main__':
     others = db.select(pub_type='5.12 Altro')
     for item in others:
         print(item)
-    
-    #pub_list.dump_journal_list('py_lista_riviste.xls')
-    #pub_list.dump_nojif_journals('py_riviste_no_doi.xls')
-    #pub_list.dump_pubs_no_doi('py_articoli_no_doi.xls')
-    #pub_list.dump_pubs_with_suspect_author_list('py_articoli_lista_autori_sospetta.xls')
