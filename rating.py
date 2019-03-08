@@ -409,57 +409,6 @@ class ProductDatabase(list):
             workbook.save(file_path)
             logging.info('Done.')
 
-    def dump_doi_duplicates(self, file_path):
-        """Dump a list of papers with the same DOI and different unique handles.
-        """
-        logging.info('Dumping DOI duplicates...')
-        handle_dict = {}
-        doi_dict = {}
-        num_errors = 0
-        error_doi_list = []
-        for pub in self:
-            doi = pub.doi
-            if doi is not None:
-                handle = pub.handle
-                author = '%s %s @ row %d.' %\
-                         (pub.author_surname, pub.author_name[:1],
-                          pub.row_index)
-                if handle_dict.has_key(handle):
-                    handle_dict[handle].append(author)
-                else:
-                    handle_dict[handle] = [author]
-                if doi_dict.has_key(doi):
-                    try:
-                        assert handle in doi_dict[doi]
-                    except AssertionError:
-                        num_errors += 1
-                        doi_dict[doi].append(handle)
-                        error_doi_list.append(doi)
-                        logging.error('Duplicated DOI (%s) for %s' % (doi, pub))
-                else:
-                    doi_dict[doi] = [handle]
-        logging.info('%d error(s) found.' % num_errors)
-        if file_path is not None:
-            logging.info('Writing output file %s...' % file_path)
-            workbook = xlwt.Workbook()
-            worksheet = workbook.add_sheet('Duplicati DOI')
-            cells = ['DOI',
-                     'Handle 1',
-                     'Handle 2',
-                     'Handle 3',
-                     'Handle 4',
-                     'Handle 5'
-            ]
-            for col, value in enumerate(cells):
-                worksheet.write(0, col, value)
-            for i, doi in enumerate(error_doi_list):
-                worksheet.write(i + 1, 0, doi)
-                for col, value in enumerate(doi_dict[doi]):
-                    value = '%s %s' % (value, handle_dict[value])
-                    worksheet.write(i + 1, col + 1, value)
-            workbook.save(file_path)
-            logging.info('Done.')
-
     def dump_nojif_journals(self, file_path):
         """Dump the list of publications with no impact factor.
         """
@@ -575,7 +524,6 @@ if __name__ == '__main__':
         print(item)
     
     #pub_list.dump_journal_list('py_lista_riviste.xls')
-    #pub_list.dump_doi_duplicates('py_duplicati_doi.xls')
     #pub_list.dump_nojif_journals('py_riviste_no_doi.xls')
     #pub_list.dump_pubs_no_doi('py_articoli_no_doi.xls')
     #pub_list.dump_pubs_with_suspect_author_list('py_articoli_lista_autori_sospetta.xls')
