@@ -17,54 +17,43 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from rating import load_publication_list, logging, PublicationList
+from rating import load_db, logging, ProductDatabase
 
 
-PUBS = load_publication_list()
-PUBS.unique_values('pub_type')
-
+DB = load_db()
 
 
 def check_journal():
     """All the journal articles must have the journal field set
     """
-    selection = PUBS.select(pub_type='1.1 Articolo in rivista',
-                                journal=None)
-    assert len(selection) == 0
+    sel = DB.select(pub_type='1.1 Articolo in rivista', journal=None)
+    assert len(sel) == 0
 
 
-def check_articles():
+def check_article_doi():
+    """Dump a list of all the articles with no DOI.
     """
-    """
-    selection = PUBS.select(pub_type='1.1 Articolo in rivista', doi=None)
-    for pub in selection:
-        print(pub)
+    sel = DB.select(pub_type='1.1 Articolo in rivista', doi=None)
+    for item in sel:
+        print(item)
 
 
-def check_monographies():
+def check_monography_isbn():
     """All monographies have an ISBN?
-    """
-    selection = PUBS.select(pub_type='3.1 Monografia o trattato scientifico',
-                            isbn=None)
-    for pub in selection:
-        print(pub)
 
-
-def check_volume():
+    FIXME: restore the isbn field.
     """
-    """
-    selection = PUBS.select(journal=None, volume=None)
-    selection.unique_values('pub_type')
-    for pub in selection:
-        print pub
+    sel = DB.select(pub_type='3.1 Monografia o trattato scientifico', isbn=None)
+    for item in sel:
+        print(item)
 
 
 def check_author_string():
     """
     """
     logging.info('Checking author string...')
-    selection = PUBS.select(author_string=None)
-    assert len(selection) == 0
+    sel = DB.select(author_string=None)
+    assert len(sel) == 0
     logging.info('No publications with empty author string---good.')
 
     def print_info(pub):
@@ -77,38 +66,32 @@ def check_author_string():
     
     logging.info('"author" in author string?')
     n = 0
-    for pub in PUBS:
+    for pub in DB:
         if 'author' in pub.author_string:
             print_info(pub)
             n += 1
     logging.info('%d suspicious entries found.\n' % n)
     logging.info('"collaboration" in author string and a few authors?')
     n = 0
-    for pub in PUBS:
+    for pub in DB:
         if 'collaboration' in pub.author_string.lower() and\
            pub.num_authors < 20:
             print_info(pub)
             n += 1
-    logging.info('%d suspicisous entries found.\n' % n)
+    logging.info('%d suspicious entries found.\n' % n)
     logging.info('"at al" in author string?')
     n = 0
-    for pub in PUBS:
+    for pub in DB:
         if 'et al' in pub.author_string.lower():
             print_info(pub)
             n += 1
     logging.info('%d suspicisous entries found.\n' % n)
-
-def check_truncated_author_string():
-    """
-    """
-    pub_list = PUBS.select(truncated=True)
-    
+  
 
 
 if __name__ == '__main__':
-    #check_journal()
-    #check_articles()
-    #check_monographies()
-    #check_volume()
+    check_journal()
+    check_article_doi()
+    #check_monography_isbn()
     check_author_string()
-    #check_truncated_author_string()
+

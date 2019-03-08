@@ -74,9 +74,6 @@ class Product(object):
         'c'             : 0.5
     }
     
-
-    MAX_AUTHOR_STRING_LEN = 3800
-
     def __init__(self, row, row_index):
         """Constructor from a row of an excel file.
         """
@@ -90,7 +87,6 @@ class Product(object):
             if not val:
                 val = None
             self.__setattr__(attr, val)
-        self.truncated = len(self.author_string) >= self.MAX_AUTHOR_STRING_LEN
 
     def last_author(self):
         """Return the last author in the author string.
