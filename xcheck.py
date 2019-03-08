@@ -42,14 +42,6 @@ def check_journal():
     assert len(sel) == 0
 
 
-def check_article_doi():
-    """Dump a list of all the articles with no DOI.
-    """
-    sel = DB.select(pub_type='1.1 Articolo in rivista', doi=None)
-    for item in sel:
-        print(item)
-
-
 def check_monography_isbn():
     """All monographies have an ISBN?
 
@@ -64,7 +56,5 @@ def check_monography_isbn():
 if __name__ == '__main__':
     basic_info()
     check_journal()
-    #check_article_doi()
     check_monography_isbn()
-    #check_author_string()
 
