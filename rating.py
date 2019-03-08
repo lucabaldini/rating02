@@ -61,6 +61,19 @@ class Publication(object):
         'wos_j5yif'     : float
     }
 
+    SUB_AREA_DICT = {
+        'a'             : 'Sperimentali grandi collaborazioni',
+        'b'             : 'Sperimentali piccole collaborazioni',
+        'c'             : 'Teorici'
+    }
+
+    WEIGHTING_INDEX_DICT = {
+        'a'             : 0.3333333333333,
+        'b'             : 0.3333333333333,
+        'c'             : 0.5
+    }
+    
+
     MAX_AUTHOR_STRING_LEN = 3800
 
     def __init__(self, row, row_index):
@@ -97,12 +110,100 @@ class Publication(object):
         for col, value in enumerate(cells):
             worksheet.write(row, col, value)
 
+    @classmethod
+    def _weighting_index(self, sub_area):
+        """Return the weighting index for the rating evaluation for publications
+        in journals and proceedings.
+        """
+        return self.WEIGHTING_INDEX_DICT[sub_area]
+
+    def _weight_to_rating_points(self, weight, sub_area):
+        """Convert the weight to actual rating points for publications
+        in journals and proceedings.
+        """
+        q = self._weighting_index(sub_area)
+        return 6. * weight / min(self.num_authors**q, 10.)
+
+    def rating_points(self, sub_area):
+        """Return the rating points for the product.
+
+        Mind this is the main function encapsulating all the logic for the
+        rating evaluation.
+        """
+        impact_factor = self.wos_j5yif
+        pub_type = self.pub_type
+
+        if pub_type == '1.1 Articolo in rivista':
+            if impact_factor is None:
+                w = 0.2
+            elif impact_factor < 1:
+                w = 0.6
+            elif impact_factor < 3:
+                w = 1.
+            else:
+                w = 1.3
+            return self._weight_to_rating_points(w, sub_area)
+
+        if pub_type == '1.5 Abstract in rivista':
+            return 0.
+
+        if pub_type == '1.6 Traduzione in rivista':
+            return 0.
+
+        if pub_type == '2.1 Contributo in volume':
+            if impact_factor is None:
+                return 0.
+            else:
+                return 0.6
+
+        if pub_type == '2.2 Prefazione/Postfazione':
+            return 0.
+
+        if pub_type == '2.3 Breve introduzione':
+            return 0.
+
+        if pub_type == '3.1 Monografia o trattato scientifico':
+            # FIXME: to be implemented
+            return 0.
+
+        if pub_type == '3.8 Traduzione di libro':
+            # FIXME: to be discussed
+            return 0.
+
+        if pub_type == '4.1 Contributo in Atti di convegno':
+            if impact_factor is None:
+                w = 0.
+            else:
+                w = 0.3
+            return self._weight_to_rating_points(w, sub_area)   
+
+        if pub_type == '4.2 Abstract in Atti di convegno':
+            return 0.
+
+        if pub_type == '4.3 Poster':
+            return 0.
+
+        if pub_type == '5.12 Altro':
+            # FIXME: to be discussed
+            return 0.
+
+        if pub_type == '6.1 Brevetto':
+            # FIXME: to be discussed
+            return 0.
+
+        if pub_type == '7.1 Curatela':
+            # FIXME: to be discussed.
+            return 0.
+
+        logger.error('Cannot calculate weight...')
+        return 0
+
     def __str__(self):
         """String formatting.
         """
-        return '[%s @ row %d for %s], "%s", %s (%d)' %\
+        return '[%s @ row %d for %s], "%s" (%d)' %\
             (self.pub_type, self.row_index, self.author(), self.title,
-             self.journal or self.volume, self.year)
+             self.year)
 
 
 
@@ -467,7 +568,14 @@ def load_publication_list():
 
 if __name__ == '__main__':
     pub_list = load_publication_list()    
-    #pub_list.unique_values('pub_type')
+    pub_list.unique_values('pub_type')
+    books = pub_list.select(pub_type='3.1 Monografia o trattato scientifico')
+    for book in books:
+        print(book)
+    others = pub_list.select(pub_type='5.12 Altro')
+    for item in others:
+        print(item)
+    
     #pub_list.dump_journal_list('py_lista_riviste.xls')
     #pub_list.dump_doi_duplicates('py_duplicati_doi.xls')
     #pub_list.dump_nojif_journals('py_riviste_no_doi.xls')
