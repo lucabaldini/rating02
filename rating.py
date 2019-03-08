@@ -48,7 +48,7 @@ def dump_excel_table(file_path, worksheet_name, col_names, rows):
 
 
 DB_PROD_FILE_PATH = 'db_prodotti.xlsx'
-DB_PERS_FILE_PATH = 'db_persone.xlsx'
+DB_PERS_FILE_PATH = 'db_docenti.xlsx'
 
 
 
@@ -351,6 +351,52 @@ class ProductDatabase(list):
                      (sum(val_dict.values()), len(keys)))
         return val_dict
 
+
+    
+class Docent:
+
+    """
+    """
+
+    def __init__(self, identifier, full_name, sc, ssd):
+        """
+        """
+        self.identifier = identifier
+        self.full_name = full_name
+        self.sc = sc
+        self.ssd = ssd
+
+    def __str__(self):
+        """
+        """
+        return self.full_name
+
+
+    
+class DocentDatabase(list):
+
+    """
+    """
+
+    def __init__(self, file_path=None, sheet_index=0):
+        """Constructor.
+        """
+        list.__init__(self)
+        if file_path is not None:
+            logging.info('Opening excel file %s...' % file_path)
+            self.workbook = xlrd.open_workbook(file_path)
+            logging.info('Loading sheet at index %d...' % sheet_index)
+            self.sheet = self.workbook.sheet_by_index(sheet_index)
+            logging.info('Done, %d column(s) by %d row(s) found.' %\
+                         (self.sheet.ncols, self.sheet.nrows))
+            self.__parse()
+
+    def __parse(self):
+        """
+        """
+        pass
+    
+
         
 
 def load_db_prod():
@@ -362,4 +408,9 @@ def load_db_prod():
 def load_db_pers():
     """Load the personnel DB from the excel file.
     """
-    return None
+    return DocentDatabase(DB_PERS_FILE_PATH)
+
+
+
+if __name__ == '__main__':
+    db = load_db_pers()
