@@ -49,7 +49,7 @@ def check_monography_isbn():
 
 
 def check_author_string():
-    """
+    """Check the author string for suspicious features.
     """
     logging.info('Checking author string...')
     sel = DB.select(author_string=None)
