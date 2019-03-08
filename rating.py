@@ -118,12 +118,18 @@ class Product(object):
         """
         return '%s, %s.' % (self.author_surname, self.author_name[:1])
 
+    def impact_factor(self):
+        """Return the impact factor of the jornal.
+        """
+        return self.wos_j5yif
+
     def write(self, worksheet, row):
         """Write the basic article info to a worksheet.
         """
         cells = [self.handle, self.row_index, self.author(), self.title,
                  self.author_string, self.num_authors,
-                 self.journal or self.volume, self.year, self.doi, self.wos_jif]
+                 self.journal or self.volume, self.year, self.doi,
+                 self.impact_factor()]
         for col, value in enumerate(cells):
             worksheet.write(row, col, value)
 
@@ -147,7 +153,7 @@ class Product(object):
         Mind this is the main function encapsulating all the logic for the
         rating evaluation.
         """
-        impact_factor = self.wos_j5yif
+        impact_factor = self.impact_factor()
         pub_type = self.pub_type
 
         if pub_type == '1.1 Articolo in rivista':
@@ -344,184 +350,6 @@ class ProductDatabase(list):
         logging.info('Grand-total: %d entries in %d value(s)' %\
                      (sum(val_dict.values()), len(keys)))
         return val_dict
-
-    def dump_journal_list(self, file_path):
-        """Dump an excel file containing all the relevant information for
-        the journals.
-        """
-        logging.info('Dumping journal list...')
-        journal_dict = {}
-        num_errors = 0
-        error_dict = {}
-        for pub in self:
-            journal = pub.journal
-            if journal is not None:
-                # Retrieve impact factor and year.
-                jif = pub.wos_jif
-                year = pub.year
-                # Journal already in the dict?
-                if journal_dict.has_key(journal):                    
-                    entry = journal_dict[journal]
-                    entry['num'] += 1
-                    if entry.has_key(year):
-                        try:
-                            assert jif == entry[year]
-                        except AssertionError:
-                            num_errors += 1
-                            key = (journal, year)
-                            if error_dict.has_key(key):
-                                error_dict[key] += 1
-                            else:
-                                error_dict[key] = 1
-                            logging.error('IF mismatch @ row %d for %s' %\
-                                          (pub.row_index, journal))
-                            logging.error('Year %d, exp. %s, obs. %s' %\
-                                          (year, entry[year], jif))
-                            # If the IF was None and now we see something,
-                            # most likely it was the previous value being
-                            # guilty.
-                            if entry[year] is None:
-                                logging.info('Overwriting IF for year %s...' %\
-                                             (year))
-                                entry[year] = jif
-                    else:
-                        entry[year] = jif
-                # Otherwise add the journal.
-                else:
-                    journal_dict[journal] = {year: jif, 'num': 1}
-        logging.info('%d error(s) found.' % num_errors)
-        logging.info('Error details: %s' % error_dict)
-        keys = journal_dict.keys()
-        keys.sort()
-        if file_path is not None:
-
-            def __jif(journal, year):
-                """
-                """
-                try:
-                    return journal_dict[journal][year]
-                except KeyError:
-                    return None
-            
-            logging.info('Writing output file %s...' % file_path)
-            workbook = xlwt.Workbook()
-            worksheet = workbook.add_sheet('Riviste')
-            cells = ['Rivista',
-                     'Occorrenze',
-                     'IF 2013',
-                     'IF 2014',
-                     'IF 2015',
-                     'IF 2016'
-            ]
-            for col, value in enumerate(cells):
-                worksheet.write(0, col, value)
-            for i, journal in enumerate(keys):
-                cells = [journal,
-                         journal_dict[journal]['num'],
-                         __jif(journal, 2013),
-                         __jif(journal, 2014),
-                         __jif(journal, 2015),
-                         __jif(journal, 2016)
-                ]
-                for col, value in enumerate(cells):
-                    worksheet.write(i + 1, col, value)
-            workbook.save(file_path)
-            logging.info('Done.')
-
-    def dump_nojif_journals(self, file_path):
-        """Dump the list of publications with no impact factor.
-        """
-        logging.info('Dumping the list of journals with no impact factor...')
-        all_dict = {}
-        nojif_dict = {}
-        for pub in self:
-            journal = pub.journal
-            year = pub.year
-            if journal is not None:
-                if all_dict.has_key(journal):
-                    entry = all_dict[journal]
-                    if entry.has_key(year):
-                        entry[year] += 1
-                    else:
-                        entry[year] = 1
-                else:
-                    all_dict[journal] = {year: 1}
-                jif = pub.wos_jif
-                if jif is None:                    
-                    if nojif_dict.has_key(journal):
-                        entry = nojif_dict[journal]
-                        if entry.has_key(year):
-                            entry[year] += 1
-                        else:
-                            entry[year] = 1
-                    else:
-                        nojif_dict[journal] = {year: 1}
-        if file_path is not None:
-            logging.info('Writing output file %s...' % file_path)
-            workbook = xlwt.Workbook()
-            worksheet = workbook.add_sheet('Duplicati DOI')
-            keys = nojif_dict.keys()
-            keys.sort()
-            cells = ['Rivista',
-                     'Articoli senza IF 2013',
-                     'Articoli senza IF 2014',
-                     'Articoli senza IF 2015',
-                     'Articoli senza IF 2016'
-            ]
-            for col, value in enumerate(cells):
-                worksheet.write(0, col, value)
-            for row, journal in enumerate(keys):
-                worksheet.write(row + 1, 0, journal)
-                for col, year in enumerate([2013, 2014, 2015, 2016]):
-                    try:
-                        num = nojif_dict[journal][year]
-                    except KeyError:
-                        num = 0
-                    try:
-                        denom = all_dict[journal][year]
-                    except KeyError:
-                        denom = 0
-                    value = '%d/%d' % (num, denom)
-                    worksheet.write(row + 1, col + 1, value)
-            workbook.save(file_path)
-            logging.info('Done.')
-
-    def dump_pubs_no_doi(self, file_path):
-        """Dump a list of publications with no DOI.
-        """
-        logging.info('Dumping the list of publications with no DOI...')
-        selection = self.select_journal_pubs(doi=None)
-        workbook = xlwt.Workbook()
-        worksheet = workbook.add_sheet('Articoli no DOI')
-        for row, pub in enumerate(selection):
-            pub.write(worksheet, row)
-        workbook.save(file_path)
-        logging.info('Done.')
-
-    def dump_pubs_with_suspect_author_list(self, file_path):
-        """
-        """
-        logging.info('Dumping publications with suspect author list...')
-        author_dict = {}
-        for line in open('author_dump.txt'):
-            handle, num_authors = line.strip('\n').split()
-            try:
-                num_authors = int(num_authors)
-            except:
-                num_authors = 0
-            author_dict[handle] = num_authors
-        workbook = xlwt.Workbook()
-        worksheet = workbook.add_sheet('Articoli sospetti')
-        row = 1
-        for pub in self:
-            authors = pub.author_string.lower()
-            if 'et al' in authors or 'author' in authors or \
-               'collaboration' in authors and pub.num_authors < 50:
-                pub.write(worksheet, row)
-                worksheet.write(row, 10, author_dict[pub.handle])
-                row += 1
-        workbook.save(file_path)
-        logging.info('Done.')
 
         
 
