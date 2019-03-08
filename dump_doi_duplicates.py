@@ -19,7 +19,7 @@
 
 import xlwt
 
-from rating import load_db_prod, dump_excel_table, logging
+from rating import load_db_prod, dump_excel_table
 
 
 
@@ -27,18 +27,20 @@ def dump_doi_duplicates(file_path=None):
     """Dump a list of papers with the same DOI and different unique handles.
     """
     db = load_db_prod()
-    logging.info('Dumping DOI duplicates...')
+    print('Dumping DOI duplicates...')
+
     # Some bookkeeping variables.
     handle_dict = {}
     doi_dict = {}
     num_errors = 0
     error_doi_list = []
+
     #Start the loop.
-    for pub in db:
-        doi = pub.doi
+    for prod in db:
+        doi = prod.doi
         if doi is not None:
-            handle = pub.handle
-            label = '%s @ row %d.' % (pub.author(), pub.row_index)
+            handle = prod.handle
+            label = '%s @ row %d.' % (prod.author(), prod.row_index)
             if handle_dict.has_key(handle):
                 handle_dict[handle].append(label)
             else:
@@ -50,10 +52,10 @@ def dump_doi_duplicates(file_path=None):
                     num_errors += 1
                     doi_dict[doi].append(handle)
                     error_doi_list.append(doi)
-                    logging.error('Duplicated DOI (%s) for %s' % (doi, pub))
+                    print('Duplicated DOI (%s) for %s' % (doi, prod))
             else:
                 doi_dict[doi] = [handle]
-    logging.info('%d error(s) found.' % num_errors)
+    print('%d error(s) found.' % num_errors)
 
     # Write the output file.
     if file_path is not None:
@@ -65,7 +67,7 @@ def dump_doi_duplicates(file_path=None):
                 value = '%s %s' % (value, handle_dict[value])
                 row.append(value)
             rows.append(row)
-        dump_excel_table(file_path, 'Duplicati DOI', col_names, rows)
+        dump_excel_table(file_path, 'DOI duplicates', col_names, rows)
         
 
 

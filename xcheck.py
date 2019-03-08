@@ -58,46 +58,6 @@ def check_monography_isbn():
     sel = DB.select(pub_type='3.1 Monografia o trattato scientifico', isbn=None)
     for item in sel:
         print(item)
-
-
-def check_author_string():
-    """Check the author string for suspicious features.
-    """
-    logging.info('Checking author string...')
-    sel = DB.select(author_string=None)
-    assert len(sel) == 0
-    logging.info('No publications with empty author string---good.')
-
-    def print_info(pub):
-        """
-        """
-        print(pub)
-        print('Author string: %s' % pub.author_string)
-        print('# authors: %s' % pub.num_authors)
-        print('DOI: %s' % pub.doi)
-    
-    logging.info('"author" in author string?')
-    n = 0
-    for pub in DB:
-        if 'author' in pub.author_string:
-            print_info(pub)
-            n += 1
-    logging.info('%d suspicious entries found.\n' % n)
-    logging.info('"collaboration" in author string and a few authors?')
-    n = 0
-    for pub in DB:
-        if 'collaboration' in pub.author_string.lower() and\
-           pub.num_authors < 20:
-            print_info(pub)
-            n += 1
-    logging.info('%d suspicious entries found.\n' % n)
-    logging.info('"at al" in author string?')
-    n = 0
-    for pub in DB:
-        if 'et al' in pub.author_string.lower():
-            print_info(pub)
-            n += 1
-    logging.info('%d suspicisous entries found.\n' % n)
   
 
 
