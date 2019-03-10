@@ -17,13 +17,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+import numpy
+
 from rating import *
 
 import _rating2018 as _rating
 
 
 
-def dump_rating(file_path):
+def dump_rating(file_path, collab_threshold=20):
     """Dump the full rating information.
     """
     db_prod = load_db_prod()
@@ -41,15 +43,33 @@ def dump_rating(file_path):
             prods = db_prod.select(author_full_name=pers.full_name)
             rating = sum(prod.rating_points(sub_area, _rating.RATING_DICT) for\
                          prod in prods)
+            num_authors = numpy.array([prod.num_authors for prod in prods])
+            # Update the Docent object.
             pers.rating = rating
+            pers.num_products = len(prods)
+            pers.num_collab_products = (num_authors > collab_threshold).sum()
+            pers.min_num_authors = num_authors.min()
+            pers.mean_num_authors = num_authors.mean()
+            pers.max_num_authors = num_authors.max()
+
 
     print('Sorting docents within sub-areas...')
+    table = ExcelTableDump()
+    col_names = ['Ranking', 'Nome', 'Punti rating', 'Numero prodotti',
+                 'Numero prodotti con > %d autori' % collab_threshold,
+                 '# autori min', '# autori medio', '# autori max']
     for sub_area in sub_areas:
+        rows = []
         pers_dict[sub_area].sort(reverse=True)
         print('Ratings points for sub-area %s:' % sub_area)
         for i, pers in enumerate(pers_dict[sub_area]):
             print('%2i -- %s: %f rating points.' %\
                   (i, pers.full_name, pers.rating))
+            rows.append([i, pers.full_name, pers.rating, pers.num_products,
+                         pers.num_collab_products, pers.min_num_authors,
+                         pers.mean_num_authors, pers.max_num_authors])
+        table.add_worksheet('Sottoarea %s' % sub_area, col_names, rows)
+    table.write(file_path)
 
 
 if __name__ == '__main__':

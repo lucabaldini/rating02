@@ -413,7 +413,6 @@ class Docent(DatabaseEntry):
         """Overloaded constructor.
         """
         DatabaseEntry.__init__(self, row, row_number)
-        self.rating = None
 
     def __cmp__(self, other):
         """Comparison operator (for sorting the database).
@@ -440,6 +439,35 @@ class DocentDatabase(Database):
             pers = Docent(sheet.row(i), i + 1)
             self.append(pers)
 
+
+class ExcelTableDump:
+
+    """Convenience class describing a table to be written in an output 
+    excel file.
+    """
+
+    def __init__(self):
+        """Create an empty workbook.
+        """
+        self.workbook = xlwt.Workbook()
+
+    def add_worksheet(self, name, col_names, rows):
+        """Add a worksheet to the workbook.
+        """
+        worksheet = self.workbook.add_sheet(name)
+        for col, name in enumerate(col_names):
+            worksheet.write(0, col, name)
+        for i, row in enumerate(rows):
+            for j, val in enumerate(row):
+                worksheet.write(i + 1, j, val)
+
+    def write(self, file_path):
+        """Write the table dump to file.
+        """
+        print('Writing table dump to %s...' % file_path)
+        self.workbook.save(file_path)
+        print('Done.')
+    
         
 
 def load_db_prod():
