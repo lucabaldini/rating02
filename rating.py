@@ -18,8 +18,6 @@
 
 import os
 import pickle
-import logging
-logging.basicConfig(format='>>> %(message)s', level=logging.DEBUG)
 
 import xlrd
 import xlwt
@@ -34,7 +32,7 @@ def encode_ascii(unicode_string):
 def dump_excel_table(file_path, worksheet_name, col_names, rows):
     """
     """
-    logging.info('Writing data table to %s...' % file_path)
+    print('Writing data table to %s...' % file_path)
     workbook = xlwt.Workbook()
     worksheet = workbook.add_sheet(worksheet_name)
     for col, name in enumerate(col_names):
@@ -43,7 +41,7 @@ def dump_excel_table(file_path, worksheet_name, col_names, rows):
         for j, val in enumerate(row):
             worksheet.write(i + 1, j, val)
     workbook.save(file_path)
-    logging.info('Done.')
+    print('Done.')
 
 
 
@@ -107,21 +105,21 @@ class Database(list):
         pickle_file_path = '%s.pickle' % file_path
         # Case 1: the pickled file path exists, so use it.
         if os.path.exists(pickle_file_path):
-            logging.info('Loading pickled db from %s...' % pickle_file_path)
+            print('Loading pickled db from %s...' % pickle_file_path)
             for item in pickle.load(open(pickle_file_path, 'rb')):
                 self.append(item)
         # Case 2: read the actual data from the original excel file.
         else:
-            logging.info('Opening excel file %s...' % file_path)
+            print('Opening excel file %s...' % file_path)
             workbook = xlrd.open_workbook(file_path)
-            logging.info('Loading sheet at index %d...' % sheet_index)
+            print('Loading sheet at index %d...' % sheet_index)
             sheet = workbook.sheet_by_index(sheet_index)
-            logging.info('Done, %d column(s) by %d row(s) found.' %\
-                         (sheet.ncols, sheet.nrows))
-            logging.info('Parsing file information...')
+            print('Done, %d column(s) by %d row(s) found.' %\
+                  (sheet.ncols, sheet.nrows))
+            print('Parsing file information...')
             self.parse(sheet)
-            logging.info('Done, %d row(s) parsed.' % sheet.nrows)
-            logging.info('Dumping pickled db to %s...' % pickle_file_path)
+            print('Done, %d row(s) parsed.' % sheet.nrows)
+            print('Dumping pickled db to %s...' % pickle_file_path)
             pickle.dump(self, open(pickle_file_path, 'wb'))
 
     def parse(self, sheet):
@@ -283,7 +281,7 @@ class Product(DatabaseEntry):
             # FIXME: to be discussed.
             return 0.
 
-        logging.error('Cannot calculate weight...')
+        print('Error, cannot calculate weight...')
         return 0
 
     def __str__(self):
@@ -316,7 +314,7 @@ class ProductDatabase(Database):
         if kwargs == {}:
             return self
         if not quiet:
-            logging.info('Selecting publications with %s...' % kwargs)
+            print('Selecting publications with %s...' % kwargs)
         selection = ProductDatabase()
         for pub in self:
             accept = True
@@ -327,7 +325,7 @@ class ProductDatabase(Database):
             if accept:
                 selection.append(pub)
         if not quiet:
-            logging.info('Done, %d item(s) selected.' % len(selection))
+            print('Done, %d item(s) selected.' % len(selection))
         return selection
 
     def select_journal_pubs(self, quiet=False, **kwargs):
@@ -345,31 +343,30 @@ class ProductDatabase(Database):
     def match_title(self, pattern, **kwargs):
         """
         """
-        logging.info('Selecting titles matching "%s" with %s...' %\
-                     (pattern, kwargs))
+        print('Selecting titles matching "%s" with %s...' % (pattern, kwargs))
         selection = ProductDatabase()
         for pub in self.select(True, **kwargs):
             if pattern.lower() in pub.title.lower():
                 selection.append(pub)
-        logging.info('Done, %d item(s) selected.' % len(selection))
+        print('Done, %d item(s) selected.' % len(selection))
         return selection
 
     def match_author_string(self, pattern, **kwargs):
         """
         """
-        logging.info('Selecting author strings matching "%s" with %s...' %\
-                     (pattern, kwargs))
+        print('Selecting author strings matching "%s" with %s...' %\
+              (pattern, kwargs))
         selection = ProductDatabase()
         for pub in self.select(True, **kwargs):
             if pattern.lower() in pub.author_string.lower():
                 selection.append(pub)
-        logging.info('Done, %d item(s) selected.' % len(selection))
+        print('Done, %d item(s) selected.' % len(selection))
         return selection
 
     def unique_values(self, field, **kwargs):
         """Basic stat of the unique values for a given field.
         """
-        logging.info('Listing unique values for field %s with %s...' %\
+        print('Listing unique values for field %s with %s...' %\
                      (field, kwargs))
         selection = self.select(True, **kwargs)
         val_dict = {}
@@ -382,9 +379,9 @@ class ProductDatabase(Database):
         keys = val_dict.keys()
         keys.sort()
         for key in keys:
-            logging.info('%s: %s' % (key, val_dict[key]))
-        logging.info('Grand-total: %d entries in %d value(s)' %\
-                     (sum(val_dict.values()), len(keys)))
+            print('%s: %s' % (key, val_dict[key]))
+        print('Grand-total: %d entries in %d value(s)' %\
+              (sum(val_dict.values()), len(keys)))
         return val_dict
 
 
@@ -444,5 +441,3 @@ def load_db_pers():
 if __name__ == '__main__':
     db1 = load_db_prod()
     db2 = load_db_pers()
-    for pers in db2:
-        print(pers)

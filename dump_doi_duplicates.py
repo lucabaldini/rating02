@@ -17,10 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-import xlwt
-
-from rating import load_db_prod, dump_excel_table
-
+from rating import *
 
 
 def dump_doi_duplicates(file_path=None):
