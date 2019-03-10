@@ -397,8 +397,8 @@ class Docent(DatabaseEntry):
     FIELD_DICT = {
         'identifier'    : 0,
         'full_name'     : 1,
-        'sc'            : 2,
-        'ssd'           : 3
+        'role'          : 3,
+        'sub_area'      : 14
     }
 
     FORMAT_DICT = {
@@ -408,7 +408,8 @@ class Docent(DatabaseEntry):
     def __str__(self):
         """String formatting.
         """
-        return self.full_name
+        return '%s (%s, sub-area %s)' %\
+            (self.full_name, self.role, self.sub_area)
 
 
     
@@ -443,4 +444,5 @@ def load_db_pers():
 if __name__ == '__main__':
     db1 = load_db_prod()
     db2 = load_db_pers()
-
+    for pers in db2:
+        print(pers)
