@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+import sys
 import pickle
 
 import xlrd
@@ -241,15 +242,38 @@ class Product(DatabaseEntry):
         q = self._weighting_index(sub_area)
         return 6. * weight / min(self.num_authors**q, 10.)
 
-    def rating_points(self, sub_area):
+    def rating_points(self, sub_area, lookup_table={}):
         """Return the rating points for the product.
 
         Mind this is the main function encapsulating all the logic for the
         rating evaluation.
-        """
-        impact_factor = self.impact_factor()
-        pub_type = self.pub_type
 
+        Since the rating cannot be calculated programmatically for all 
+        products, and ultimatly a human decision is needed in some cases,
+        a generic lookup table indexed by the unique handle of the product
+        can be optionally passed as an argument, in which case the table
+        itself overrides all the other possibilities.
+
+        Note that the books and a few other categories (e.g., others) *must* be
+        assigned a rating in the lookup table.
+        """
+        # Is the unique handle in the optional lookup table? If yes
+        # read the number and return.
+        try:
+            rating = lookup_table[self.handle]
+            print('Reading rating for handle %s from lookup table (%.3f)' %\
+                  (self.handle, rating))
+            return rating
+        except KeyError:
+            pass
+
+        # No lookup table passed or the unique handle is not in the lookup
+        # table. Need the publication type and (in most cases) the impact
+        # factor.
+        pub_type = self.pub_type
+        impact_factor = self.impact_factor()
+
+        # Real journal paper? (Most common case.)
         if pub_type == '1.1 Articolo in rivista':
             if impact_factor is None:
                 w = 0.2
@@ -261,58 +285,30 @@ class Product(DatabaseEntry):
                 w = 1.3
             return self._weight_to_rating_points(w, sub_area)
 
-        if pub_type == '1.5 Abstract in rivista':
-            return 0.
-
-        if pub_type == '1.6 Traduzione in rivista':
-            return 0.
-
-        if pub_type == '2.1 Contributo in volume':
-            if impact_factor is None:
-                return 0.
-            else:
-                return 0.6
-
-        if pub_type == '2.2 Prefazione/Postfazione':
-            return 0.
-
-        if pub_type == '2.3 Breve introduzione':
-            return 0.
-
-        if pub_type == '3.1 Monografia o trattato scientifico':
-            # FIXME: to be implemented
-            return 0.
-
-        if pub_type == '3.8 Traduzione di libro':
-            # FIXME: to be discussed
-            return 0.
-
+        # Proceedings? (Second most common case.) 
         if pub_type == '4.1 Contributo in Atti di convegno':
             if impact_factor is None:
                 w = 0.
             else:
                 w = 0.3
-            return self._weight_to_rating_points(w, sub_area)   
+            return self._weight_to_rating_points(w, sub_area)
 
-        if pub_type == '4.2 Abstract in Atti di convegno':
+        # Chapters---like C journal papers of the same sub-area.
+        if pub_type == '2.1 Contributo in volume (Capitolo o Saggio)':
+            if impact_factor is None:
+                return 0.
+            else:
+                return self._weight_to_rating_points(0.6, sub_area)
+
+        # Now a whole bunch of categories totaling zero rating points.
+        zero_types = ['1.5 Abstract in rivista', '1.6 Traduzione in rivista',
+                      '2.2 Prefazione/Postfazione', '2.3 Breve introduzione',
+                      '4.2 Abstract in Atti di convegno', '4.3 Poster']
+        if pub_type in zero_types:
             return 0.
 
-        if pub_type == '4.3 Poster':
-            return 0.
-
-        if pub_type == '5.12 Altro':
-            # FIXME: to be discussed
-            return 0.
-
-        if pub_type == '6.1 Brevetto':
-            # FIXME: to be discussed
-            return 0.
-
-        if pub_type == '7.1 Curatela':
-            # FIXME: to be discussed.
-            return 0.
-
-        print('Error, cannot calculate weight...')
+        sys.exit('Cannot rate handle %s, %s, %d author(s), IF = %s...' %\
+                 (self.handle, self, self.num_authors, self.impact_factor()))
         return 0
 
     def __str__(self):
