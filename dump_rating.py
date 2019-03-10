@@ -18,6 +18,7 @@
 
 
 import numpy
+import matplotlib.pyplot as plt
 
 from rating import *
 
@@ -25,7 +26,7 @@ import _rating2018 as _rating
 
 
 
-def dump_rating(file_path, collab_threshold=20):
+def dump_rating(file_path, collab_threshold=50):
     """Dump the full rating information.
     """
     db_prod = load_db_prod()
@@ -63,6 +64,7 @@ def dump_rating(file_path, collab_threshold=20):
         pers_dict[sub_area].sort(reverse=True)
         print('Ratings points for sub-area %s:' % sub_area)
         for i, pers in enumerate(pers_dict[sub_area]):
+            pers.ranking = i
             print('%2i -- %s: %f rating points.' %\
                   (i, pers.full_name, pers.rating))
             rows.append([i, pers.full_name, pers.rating, pers.num_products,
@@ -70,6 +72,27 @@ def dump_rating(file_path, collab_threshold=20):
                          pers.mean_num_authors, pers.max_num_authors])
         table.add_worksheet('Sottoarea %s' % sub_area, col_names, rows)
     table.write(file_path)
+
+    print('Doing some plotting')
+    for sub_area in sub_areas:
+        plt.figure('Sottoarea %s' % sub_area, figsize=(12, 8))
+        ranking = [pers.ranking for pers in pers_dict[sub_area]]
+        rating = [pers.rating for pers in pers_dict[sub_area]]
+        plt.plot(ranking, rating, 'o')
+        plt.xlabel('Ranking')
+        plt.ylabel('Rating points')
+        for pers in pers_dict[sub_area]:
+            x = pers.ranking
+            y = pers.rating
+            name = pers.full_name.split()[0].title()
+            if name in ['Di', 'Del', 'Prada']:
+                name += ' %s' % pers.full_name.split()[1].title()
+            txt = '%s, %d (%d) <%.1f>' %\
+                (name, pers.num_products, pers.num_collab_products,
+                 pers.mean_num_authors)
+            plt.text(x, y, txt, rotation=30., ha='left', va='bottom')
+        plt.savefig('rating02_2018_%s.png' % sub_area)
+    plt.show()
 
 
 if __name__ == '__main__':
