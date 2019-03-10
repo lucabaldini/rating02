@@ -73,6 +73,7 @@ class DatabaseEntry(object):
             self.__setattr__(attr, val)
 
 
+
 class Database(list):
 
     """Base class for a database.
@@ -421,7 +422,6 @@ class DocentDatabase(Database):
         for i in range(1, sheet.nrows):
             pers = Docent(sheet.row(i), i + 1)
             self.append(pers)
-    
 
         
 
@@ -429,6 +429,7 @@ def load_db_prod():
     """Load the publication list from the excel file.
     """
     return ProductDatabase(DB_PROD_FILE_PATH)
+
 
 
 def load_db_pers():
