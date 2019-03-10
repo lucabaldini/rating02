@@ -76,6 +76,7 @@ def dump_rating(file_path, collab_threshold=50):
     print('Doing some plotting')
     for sub_area in sub_areas:
         plt.figure('Sottoarea %s' % sub_area, figsize=(12, 8))
+        plt.title('Sottoarea %s' % sub_area, size=20)
         ranking = [pers.ranking for pers in pers_dict[sub_area]]
         rating = [pers.rating for pers in pers_dict[sub_area]]
         plt.plot(ranking, rating, 'o')
@@ -91,6 +92,9 @@ def dump_rating(file_path, collab_threshold=50):
                 (name, pers.num_products, pers.num_collab_products,
                  pers.mean_num_authors)
             plt.text(x, y, txt, rotation=30., ha='left', va='bottom')
+        leg = 'Cognome, # prod (# prod > %d auth) <mean # auth>' %\
+            (collab_threshold)
+        plt.text(0.5, 0.9, leg, transform=plt.gca().transAxes, size=12)
         plt.savefig('rating02_2018_%s.png' % sub_area)
     plt.show()
 
