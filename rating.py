@@ -413,7 +413,12 @@ class Docent(DatabaseEntry):
         """Overloaded constructor.
         """
         DatabaseEntry.__init__(self, row, row_number)
-        #self.name, self.surname = self.full_name.split()
+        self.rating = None
+
+    def __cmp__(self, other):
+        """Comparison operator (for sorting the database).
+        """
+        return cmp(self.rating, other.rating)
 
     def __str__(self):
         """String formatting.

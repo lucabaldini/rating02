@@ -28,13 +28,28 @@ def dump_rating(file_path):
     """
     db_prod = load_db_prod()
     db_pers = load_db_pers()
-    for sub_area in sorted(Product.SUB_AREA_DICT.keys()):
-        print('Calculating rating points for sub-area %s...' % sub_area)
-        for pers in db_pers.select(sub_area=sub_area):
-            prods = db_prod.select(author_full_name=pers.full_name)
-            rating = sum(prod.rating_points(sub_area, _r.RATING_POINT_DICT) for prod in prods)
-            print(rating)
+    sub_areas = sorted(Product.SUB_AREA_DICT.keys())
 
+    print('Populating sub-areas...')
+    pers_dict = {}
+    for sub_area in sub_areas:
+        pers_dict[sub_area] = db_pers.select(sub_area=sub_area)
+
+    print('Calculating rating points...')
+    for sub_area in sub_areas:
+        for pers in pers_dict[sub_area]:
+            prods = db_prod.select(author_full_name=pers.full_name)
+            rating = sum(prod.rating_points(sub_area, _r.RATING_POINT_DICT) for\
+                         prod in prods)
+            pers.rating = rating
+
+    print('Sorting docents within sub-areas...')
+    for sub_area in sub_areas:
+        pers_dict[sub_area].sort(reverse=True)
+        print('Ratings points for sub-area %s:' % sub_area)
+        for i, pers in enumerate(pers_dict[sub_area]):
+            print('%2i -- %s: %f rating points.' %\
+                  (i, pers.full_name, pers.rating))
 
 
 if __name__ == '__main__':
