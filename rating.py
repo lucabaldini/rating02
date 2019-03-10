@@ -16,12 +16,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import os
+import pickle
+import logging
+logging.basicConfig(format='>>> %(message)s', level=logging.DEBUG)
 
 import xlrd
 import xlwt
-
-import logging
-logging.basicConfig(format='>>> %(message)s', level=logging.DEBUG)
 
 
 def encode_ascii(unicode_string):
@@ -218,7 +219,7 @@ class Product(object):
             # FIXME: to be discussed.
             return 0.
 
-        logger.error('Cannot calculate weight...')
+        logging.error('Cannot calculate weight...')
         return 0
 
     def __str__(self):
@@ -229,49 +230,77 @@ class Product(object):
              self.year)
 
 
+    
+class Database(list):
 
-class ProductDatabase(list):
+    """Base class for a database.
+
+    A few notes about the logic. We read each of the databases from excel
+    files, and this class is acting as a base class for all the real db
+    instances (i.e., the product and docent db). The __init__() method does
+    all the bookkeeping work, while the actual internal of how the information
+    in the excel files is used is delegated to the parse() method, which is
+    no-ops in the base class and must be reimplemented in sub-classes.
+
+    Since the product database is generally quite large, and most of its
+    information is irrelvant for our purposes, in order to decrease the
+    bootstrap time, we do create a pickles version of the database on the
+    first read and use that for subsequent accesses. (Simply remove the pickle
+    file to recreate it.)
+
+    Note that none of the xlrd object is preserved as class members, since
+    that would make pickling problematic.
+    """
+
+    def __init__(self, file_path=None, sheet_index=0):
+        """Constructor.        
+        """
+        list.__init__(self)
+        # If file_path is None create an empty database (this is used for
+        # the underlying selction mechanism.)
+        if file_path is None:
+            return
+        pickle_file_path = '%s.pickle' % file_path
+        # Case 1: the pickled file path exists, so use it.
+        if os.path.exists(pickle_file_path):
+            logging.info('Loading pickled db from %s...' % pickle_file_path)
+            for item in pickle.load(open(pickle_file_path, 'rb')):
+                self.append(item)
+        # Case 2: read the actual data from the original excel file.
+        else:
+            logging.info('Opening excel file %s...' % file_path)
+            workbook = xlrd.open_workbook(file_path)
+            logging.info('Loading sheet at index %d...' % sheet_index)
+            sheet = workbook.sheet_by_index(sheet_index)
+            logging.info('Done, %d column(s) by %d row(s) found.' %\
+                         (sheet.ncols, sheet.nrows))
+            self.parse(sheet)
+            logging.info('Dumping pickled db to %s...' % pickle_file_path)
+            pickle.dump(self, open(pickle_file_path, 'wb'))
+
+    def parse(self, sheet):
+        """Do-nothing parse mehod to be reimplemented in derived classes.
+        """
+        raise NotImplementedError
+
+
+
+class ProductDatabase(Database):
 
     """Utility class representing the full list of Product objects from the
     publication excel file.
     """
 
-    def __init__(self, file_path=None, sheet_index=0):
-        """Constructor.
-        """
-        list.__init__(self)
-        if file_path is not None:
-            logging.info('Opening excel file %s...' % file_path)
-            self.workbook = xlrd.open_workbook(file_path)
-            logging.info('Loading sheet at index %d...' % sheet_index)
-            self.sheet = self.workbook.sheet_by_index(sheet_index)
-            logging.info('Done, %d column(s) by %d row(s) found.' %\
-                         (self.sheet.ncols, self.sheet.nrows))
-            self.__parse()
-
-    def __parse(self, num_rows=None):
+    def parse(self, sheet, num_rows=None):
         """Parse the content of the file and fill a comprehesive list
         of Product objects.
         """
         logging.info('Parsing file information...')
-        num_rows = num_rows or self.sheet.nrows
+        num_rows = num_rows or sheet.nrows
         for i in range(1, num_rows):
-            pub = Product(self.sheet.row(i), i + 1)
+            pub = Product(sheet.row(i), i + 1)
             self.append(pub)
         logging.info('Done, %d row(s) parsed.' % num_rows)
-
-    def at(self, index):
-        """Retrieve the publication at a given index.
-        """
-        try:
-            return self[index]
-        except IndexError:
-            return None
-
-    def at_row(self, row_index):
-        """Retrieve the publication at a given row index in the excel file.
-        """
-        return self.at(row_index - 2)
 
     def select(self, quiet=False, **kwargs):
         """Select a subsample of publications based on a given set of
@@ -355,11 +384,11 @@ class ProductDatabase(list):
     
 class Docent:
 
-    """
+    """Basic class representing a docent.
     """
 
     def __init__(self, identifier, full_name, sc, ssd):
-        """
+        """Constructor.
         """
         self.identifier = identifier
         self.full_name = full_name
@@ -367,32 +396,19 @@ class Docent:
         self.ssd = ssd
 
     def __str__(self):
-        """
+        """String formatting.
         """
         return self.full_name
 
 
     
-class DocentDatabase(list):
+class DocentDatabase(Database):
 
+    """Class representing the person database.
     """
-    """
 
-    def __init__(self, file_path=None, sheet_index=0):
-        """Constructor.
-        """
-        list.__init__(self)
-        if file_path is not None:
-            logging.info('Opening excel file %s...' % file_path)
-            self.workbook = xlrd.open_workbook(file_path)
-            logging.info('Loading sheet at index %d...' % sheet_index)
-            self.sheet = self.workbook.sheet_by_index(sheet_index)
-            logging.info('Done, %d column(s) by %d row(s) found.' %\
-                         (self.sheet.ncols, self.sheet.nrows))
-            self.__parse()
-
-    def __parse(self):
-        """
+    def parse(self, sheet):
+        """Parse method.
         """
         pass
     
@@ -413,4 +429,5 @@ def load_db_pers():
 
 
 if __name__ == '__main__':
-    db = load_db_pers()
+    db1 = load_db_prod()
+    db2 = load_db_pers()

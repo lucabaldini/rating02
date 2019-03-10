@@ -17,17 +17,17 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from rating import load_db
+from rating import load_db_prod
 
-db = load_db()
+db = load_db_prod()
 
-pubs = db.select(author_name='LUCA', author_surname='BALDINI')
-print('Done, %d publication(s) selected.' % len(pubs))
+prods = db.select(author_name='LUCA', author_surname='BALDINI')
+print('Done, %d prodouct(s) selected.' % len(prods))
 
 sub_area = 'a'
 
 print('Calulating rating points...')
-rating = sum(pub.rating_points(sub_area) for pub in pubs)
+rating = sum(prod.rating_points(sub_area) for prod in prods)
 print('Rating: %.3f' % rating)
 
     
