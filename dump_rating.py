@@ -19,7 +19,7 @@
 
 from rating import *
 
-import _r2019 as _r
+import _rating2018 as _rating
 
 
 
@@ -39,7 +39,7 @@ def dump_rating(file_path):
     for sub_area in sub_areas:
         for pers in pers_dict[sub_area]:
             prods = db_prod.select(author_full_name=pers.full_name)
-            rating = sum(prod.rating_points(sub_area, _r.RATING_POINT_DICT) for\
+            rating = sum(prod.rating_points(sub_area, _rating.RATING_DICT) for\
                          prod in prods)
             pers.rating = rating
 

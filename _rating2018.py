@@ -20,7 +20,7 @@
 """Dictionary with the rating points for the products that need to be
 exhamined "by hand".
 """
-RATING_POINT_DICT = {
+RATING_DICT = {
     # [1.2  @ row 4872 for SHORE, S.], "Astronomy: Cosmic exhumation" (2017),
     # 1 author(s), IF = 44.958
     '11568/893099' : 7.8,
