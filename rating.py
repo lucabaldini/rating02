@@ -128,6 +128,27 @@ class Database(list):
         """
         raise NotImplementedError
 
+    def select(self, quiet=False, **kwargs):
+        """Select a subsample of publications based on a given set of
+        criteria.
+        """
+        if kwargs == {}:
+            return self
+        if not quiet:
+            print('Selecting entries with %s...' % kwargs)
+        selection = ProductDatabase()
+        for pub in self:
+            accept = True
+            for (attr, val) in kwargs.items():
+                if pub.__getattribute__(attr) != val:
+                    accept = False
+                    break
+            if accept:
+                selection.append(pub)
+        if not quiet:
+            print('Done, %d entries selected.' % len(selection))
+        return selection
+
 
 
 class Product(DatabaseEntry):
@@ -307,27 +328,6 @@ class ProductDatabase(Database):
         for i in range(1, sheet.nrows):
             pub = Product(sheet.row(i), i + 1)
             self.append(pub)
-
-    def select(self, quiet=False, **kwargs):
-        """Select a subsample of publications based on a given set of
-        criteria.
-        """
-        if kwargs == {}:
-            return self
-        if not quiet:
-            print('Selecting publications with %s...' % kwargs)
-        selection = ProductDatabase()
-        for pub in self:
-            accept = True
-            for (attr, val) in kwargs.items():
-                if pub.__getattribute__(attr) != val:
-                    accept = False
-                    break
-            if accept:
-                selection.append(pub)
-        if not quiet:
-            print('Done, %d item(s) selected.' % len(selection))
-        return selection
 
     def select_journal_pubs(self, quiet=False, **kwargs):
         """Select all the publications on a journal (i.e., where the journal
