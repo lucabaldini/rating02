@@ -193,6 +193,15 @@ class Product(DatabaseEntry):
         'c'             : 0.5
     }
 
+    def __init__(self, row, row_number):
+        """Overloaded constructor.
+        """
+        DatabaseEntry.__init__(self, row, row_number)
+        # This is needed to match publications by name when dumping the rate,
+        # since the person database only has a field with the full name.
+        self.author_full_name = '%s %s' %\
+            (self.author_surname, self.author_name)
+
     def last_author(self):
         """Return the last author in the author string.
         """
@@ -402,6 +411,13 @@ class Docent(DatabaseEntry):
     FORMAT_DICT = {
         'identifier'    : int
     }
+
+
+    def __init__(self, row, row_number):
+        """Overloaded constructor.
+        """
+        DatabaseEntry.__init__(self, row, row_number)
+        #self.name, self.surname = self.full_name.split()
 
     def __str__(self):
         """String formatting.
