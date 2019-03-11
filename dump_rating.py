@@ -33,6 +33,13 @@ def dump_rating(file_path, collab_threshold=50):
     db_pers = load_db_pers()
     sub_areas = sorted(Product.SUB_AREA_DICT.keys())
 
+    print('Post-processing product list...')
+    for prod in db_prod:
+        if prod.row_index in _rating.DUPLICATES:
+            print('Marking product @ row %d for %s as invalid...' %\
+                  (prod.row_index, prod.author_surname))
+            prod.valid = False
+
     print('Populating sub-areas...')
     pers_dict = {}
     for sub_area in sub_areas:
@@ -41,7 +48,7 @@ def dump_rating(file_path, collab_threshold=50):
     print('Calculating rating points...')
     for sub_area in sub_areas:
         for pers in pers_dict[sub_area]:
-            prods = db_prod.select(author_full_name=pers.full_name)
+            prods = db_prod.select(author_full_name=pers.full_name, valid=True)
             rating = sum(prod.rating_points(sub_area, _rating.RATING_DICT) for\
                          prod in prods)
             num_authors = numpy.array([prod.num_authors for prod in prods])

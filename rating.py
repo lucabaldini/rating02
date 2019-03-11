@@ -31,7 +31,7 @@ def encode_ascii(unicode_string):
 
 
 def dump_excel_table(file_path, worksheet_name, col_names, rows):
-    """
+    """TODO: remove me in favor of the class ExcelTableDump.
     """
     print('Writing data table to %s...' % file_path)
     workbook = xlwt.Workbook()
@@ -202,6 +202,22 @@ class Product(DatabaseEntry):
         # since the person database only has a field with the full name.
         self.author_full_name = '%s %s' %\
             (self.author_surname, self.author_name)
+        # Flag allowing to mark duplicates and otherwise invalid products
+        self.valid = True
+
+    def __eq__(self, other):
+        """Loose comparison operator to remove duplicates from the product
+        lists.
+        """
+        if self.doi is not None and self.doi == other.doi:
+            return True
+        if self.pub_type == '3.1 Monografia o trattato scientifico' and\
+           self.isbn is not None and self.isbn == other.isbn:
+            return True
+        if self.title[:75] == other.title[:75] and self.year == other.year and\
+           self.journal == other.journal:
+            return True
+        return False
 
     def last_author(self):
         """Return the last author in the author string.
@@ -391,7 +407,7 @@ class ProductDatabase(Database):
         return val_dict
 
 
-    
+
 class Docent(DatabaseEntry):
 
     """Basic class representing a docent.

@@ -17,6 +17,27 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+"""List of duplicates, indexed by row number.
+"""
+DUPLICATES = [
+    980,
+    2705,
+    3485,
+    3799,
+    4686,
+    4875,
+    5012,
+    5027,
+    5031,
+    5036,
+    5038,
+    5053,
+    5054,
+    5067
+]
+
+
+
 """Dictionary with the rating points for the products that need to be
 exhamined "by hand".
 """
