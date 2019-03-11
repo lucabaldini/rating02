@@ -26,7 +26,7 @@ def dump_duplicates(file_path):
     db_prod = load_db_prod()
     db_pers = load_db_pers()
 
-    print('Dumping duplicates...')
+    print('Searching for duplicates...')
     rows = []
     for pers in db_pers:
         prods = db_prod.select(author_full_name=pers.full_name)

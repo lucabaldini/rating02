@@ -35,7 +35,7 @@ def dump_rating(file_path, collab_threshold=50):
 
     print('Post-processing product list...')
     for prod in db_prod:
-        if prod.row_index in _rating.DUPLICATES:
+        if prod.row_index in _rating.INVALID:
             print('Marking product @ row %d for %s as invalid...' %\
                   (prod.row_index, prod.author_surname))
             prod.valid = False

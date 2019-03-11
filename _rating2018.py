@@ -37,6 +37,31 @@ DUPLICATES = [
 ]
 
 
+"""List of errata, indexed by row number.
+"""
+ERRATA = [
+    222,
+    330,
+    453,
+    592,
+    921,
+    1621,
+    1793,
+    2125,
+    2611,
+    2612,
+    3416,
+    4299,
+    4626,
+    4883,
+    4943
+]
+
+
+"""List of invalid products.
+"""
+INVALID = DUPLICATES + ERRATA
+
 
 """Dictionary with the rating points for the products that need to be
 exhamined "by hand".
