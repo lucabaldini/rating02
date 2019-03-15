@@ -19,7 +19,12 @@
 
 """Total number of rating points to be assigned.
 """
-NUM_TOTAL_RATING_POINTS = 188
+TOTAL_RATING_POINTS = 188
+
+
+"""Average number of rating points per docent.
+"""
+RATING_POINTS_PER_DOCENT = TOTAL_RATING_POINTS / 74.
 
 
 """List of duplicates, indexed by row number.

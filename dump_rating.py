@@ -25,14 +25,33 @@ from rating import *
 import _rating2018 as _rating
 
 
+def filter_db_pers(db_pers):
+    """This is filtering a DocentDatabse object removing all the persons with
+    less than 2 products (which automatically get 0 rating points).
+
+    Note that, for the thing to work, this has to be called after a loop
+    over the db where the product statistics has been calculated and 
+    updated.
+    """
+    db = DocentDatabase()
+    for pers in db_pers:
+        if pers.num_products >= 2:
+            db.append(pers)
+        else:
+            print('Filtering out %s (%d products)...' %\
+                  (pers.full_name, pers.num_products))
+    return db
+
 
 def dump_rating(file_path, collab_threshold=50):
     """Dump the full rating information.
     """
+    # Load the underlying database objects.
     db_prod = load_db_prod()
     db_pers = load_db_pers()
     sub_areas = sorted(Product.SUB_AREA_DICT.keys())
 
+    # First loop over the products, where we mark the invalid as such.
     print('Post-processing product list...')
     for prod in db_prod:
         if prod.row_index in _rating.INVALID:
@@ -40,11 +59,16 @@ def dump_rating(file_path, collab_threshold=50):
                   (prod.row_index, prod.author_surname))
             prod.valid = False
 
+    # Break out the docent database into the three sub-areas.
+    # Mind at this points the sub-lists still contain the persons with less
+    # than 2 products.
     print('Populating sub-areas...')
     pers_dict = {}
     for sub_area in sub_areas:
         pers_dict[sub_area] = db_pers.select(sub_area=sub_area)
 
+    # Actual loop to calculate the rating points and the basic product
+    # statistics for all the docents.
     print('Calculating rating points...')
     for sub_area in sub_areas:
         for pers in pers_dict[sub_area]:
@@ -64,7 +88,13 @@ def dump_rating(file_path, collab_threshold=50):
             pers.mean_num_authors = float(num_authors.mean())
             pers.max_num_authors = int(num_authors.max())
 
+    # Now that we have the basic product statistics we can filter out
+    # the docents with less than 2 products.
+    for sub_area in sub_areas:
+        print('Filtering docent databse for sub-area %s...' % sub_area)
+        pers_dict[sub_area] = filter_db_pers(pers_dict[sub_area])
 
+    # Sort the docents and dump the excel file.
     print('Sorting docents within sub-areas...')
     table = ExcelTableDump()
     col_names = ['Ranking', 'Nome', 'Punti rating', 'Numero prodotti',
@@ -84,12 +114,15 @@ def dump_rating(file_path, collab_threshold=50):
         table.add_worksheet('Sottoarea %s' % sub_area, col_names, rows)
     table.write(file_path)
 
-    print('Doing some plotting')
+    # Do some plotting.
     for sub_area in sub_areas:
         plt.figure('Sottoarea %s' % sub_area, figsize=(12, 8))
-        plt.title('Sottoarea %s' % sub_area, size=20)
-        ranking = [pers.ranking for pers in pers_dict[sub_area]]
-        rating = [pers.rating for pers in pers_dict[sub_area]]
+        num_persons = len(pers_dict[sub_area])
+        num_points = _rating.RATING_POINTS_PER_DOCENT * num_persons
+        plt.title('Sottoarea %s (%d docenti, %.3f punti)' %\
+                  (sub_area, num_persons, num_points), size=18)
+        ranking = numpy.array([pers.ranking for pers in pers_dict[sub_area]])
+        rating = numpy.array([pers.rating for pers in pers_dict[sub_area]])
         plt.plot(ranking, rating, 'o')
         plt.xlabel('Ranking')
         plt.ylabel('Rating points')
@@ -102,11 +135,31 @@ def dump_rating(file_path, collab_threshold=50):
             txt = '%s, %d (%d) <%.1f>' %\
                 (name, pers.num_products, pers.num_collab_products,
                  pers.mean_num_authors)
-            plt.text(x, y, txt, rotation=30., ha='left', va='bottom')
+            plt.text(x, y, txt, rotation=20., ha='left', va='bottom')
         leg = 'Cognome, # prod (# prod > %d auth) <mean # auth>' %\
             (collab_threshold)
         plt.text(0.5, 0.9, leg, transform=plt.gca().transAxes, size=12)
-        plt.savefig('rating02_2018_%s.png' % sub_area)
+
+        # Calculate the quantiles.
+        print('Calculating quantiles for sub-area %s...' % sub_area)
+        quantiles = numpy.floor(numpy.linspace(0.22, 0.75, 3) * num_persons)
+        quantiles += 0.5
+        for q in quantiles:
+            plt.axvline(q, ls='dashed')
+        quantiles = numpy.concatenate(([-0.5], quantiles, [num_persons + 0.5]))
+        psum = 0
+        for i, (q1, q2) in enumerate(zip(quantiles[:-1], quantiles[1:])):
+            mask = (ranking > q1) * (ranking < q2)
+            r = ranking[mask]
+            n = len(r)
+            frac = float(n) / num_persons
+            p = 4 - i
+            psum += p * n
+            print('%d docents with %d points...' % (n, p))
+            plt.text(r.mean(), 2, '%d x %d = %d (%.1f %%)' %\
+                     (p, n, n * p, 100. * frac), ha='center')
+        print('Total rating points for area %s: %d' % (sub_area, psum))
+        plt.savefig('rating02_2018_%s.png' % sub_area)        
     plt.show()
 
 
