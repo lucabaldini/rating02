@@ -17,6 +17,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+"""Total number of rating points to be assigned.
+"""
+NUM_TOTAL_RATING_POINTS = 188
+
+
 """List of duplicates, indexed by row number.
 """
 DUPLICATES = [

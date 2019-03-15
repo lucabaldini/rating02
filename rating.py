@@ -545,19 +545,32 @@ def load_db_pers():
 
 
 
-def prod_info():
+def print_info():
     """Print the basic product info.
     """
-    db = load_db_prod()
-    vals = db.unique_values('pub_type')
-    books = db.select(pub_type='3.1 Monografia o trattato scientifico')
+    db_prod = load_db_prod()
+    db_pers = load_db_pers()
+    vals = db_prod.unique_values('pub_type')
+    books = db_prod.select(pub_type='3.1 Monografia o trattato scientifico')
     for book in books:
         print(book)
-    others = db.select(pub_type='5.12 Altro')
+    others = db_prod.select(pub_type='5.12 Altro')
     for item in others:
         print(item)
+    print()
+    print('Total number of docents: %d' % len(db_pers))
+    sub_areas = sorted(Product.SUB_AREA_DICT.keys())
+    for sub_area in sub_areas:
+        db = db_pers.select(sub_area=sub_area, quiet=True)
+        print('%d docent(s) in sub-area %s' % (len(db), sub_area))
+        for pers in db:
+            prods = db_prod.select(author_full_name=pers.full_name, quiet=True)
+            num_prods = len(prods)
+            if num_prods < 2:
+                print('%s only has %d product(s).' %\
+                      (pers.full_name, num_prods))
 
 
 
 if __name__ == '__main__':
-    prod_info()
+    print_info()
