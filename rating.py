@@ -347,17 +347,17 @@ class ProductDatabase(Database):
         of Product objects.
         """
         for i in range(1, sheet.nrows):
-            pub = Product(sheet.row(i), i + 1)
-            self.append(pub)
+            prod = Product(sheet.row(i), i + 1)
+            self.append(prod)
 
     def select_journal_pubs(self, quiet=False, **kwargs):
         """Select all the publications on a journal (i.e., where the journal
         field is not None).
         """
         selection = ProductDatabase()
-        for pub in self:
-            if pub.journal is not None:
-                selection.append(pub)
+        for prod in self:
+            if prod.journal is not None:
+                selection.append(prod)
         if kwargs != {}:
             selection = selection.select(quiet, **kwargs)
         return selection
@@ -367,9 +367,9 @@ class ProductDatabase(Database):
         """
         print('Selecting titles matching "%s" with %s...' % (pattern, kwargs))
         selection = ProductDatabase()
-        for pub in self.select(True, **kwargs):
-            if pattern.lower() in pub.title.lower():
-                selection.append(pub)
+        for prod in self.select(True, **kwargs):
+            if pattern.lower() in prod.title.lower():
+                selection.append(prod)
         print('Done, %d item(s) selected.' % len(selection))
         return selection
 
@@ -379,9 +379,9 @@ class ProductDatabase(Database):
         print('Selecting author strings matching "%s" with %s...' %\
               (pattern, kwargs))
         selection = ProductDatabase()
-        for pub in self.select(True, **kwargs):
-            if pattern.lower() in pub.author_string.lower():
-                selection.append(pub)
+        for prod in self.select(True, **kwargs):
+            if pattern.lower() in prod.author_string.lower():
+                selection.append(prod)
         print('Done, %d item(s) selected.' % len(selection))
         return selection
 
@@ -389,21 +389,24 @@ class ProductDatabase(Database):
         """Basic stat of the unique values for a given field.
         """
         print('Listing unique values for field %s with %s...' %\
-                     (field, kwargs))
+              (field, kwargs))
         selection = self.select(True, **kwargs)
         val_dict = {}
-        for pub in selection:
-            val = pub.__getattribute__(field)
+        for prod in selection:
+            val = prod.__getattribute__(field)
             if val in val_dict.keys():
                 val_dict[val] += 1
             else:
                 val_dict[val] = 1
         keys = val_dict.keys()
         keys.sort()
+        num_prods = sum(val_dict.values())
+        num_keys = len(keys)
         for key in keys:
-            print('%s: %s' % (key, val_dict[key]))
-        print('Grand-total: %d entries in %d value(s)' %\
-              (sum(val_dict.values()), len(keys)))
+            val = val_dict[key]
+            frac = float(val) / num_prods
+            print('%s: %s (%.3f%%)' % (key, val, 100. * frac))
+        print('Grand-total: %d entries in %d value(s)' % (num_prods, num_keys))
         return val_dict
 
 
@@ -500,6 +503,19 @@ def load_db_pers():
 
 
 
+def prod_info():
+    """Print the basic product info.
+    """
+    db = load_db_prod()
+    vals = db.unique_values('pub_type')
+    books = db.select(pub_type='3.1 Monografia o trattato scientifico')
+    for book in books:
+        print(book)
+    others = db.select(pub_type='5.12 Altro')
+    for item in others:
+        print(item)
+
+
+
 if __name__ == '__main__':
-    db1 = load_db_prod()
-    db2 = load_db_pers()
+    prod_info()
