@@ -24,23 +24,6 @@ import xlrd
 import xlwt
 
 
-def dump_excel_table(file_path, worksheet_name, col_names, rows):
-    """TODO: remove me in favor of the class ExcelTableDump.
-    """
-    print('Writing data table to %s...' % file_path)
-    workbook = xlwt.Workbook()
-    worksheet = workbook.add_sheet(worksheet_name)
-    for col, name in enumerate(col_names):
-        worksheet.write(0, col, name)
-    for i, row in enumerate(rows):
-        for j, val in enumerate(row):
-            worksheet.write(i + 1, j, val)
-    workbook.save(file_path)
-    print('Done.')
-
-
-
-
 DB_PROD_FILE_PATH = 'db_prodotti.xlsx'
 DB_PERS_FILE_PATH = 'db_docenti.xlsx'
 

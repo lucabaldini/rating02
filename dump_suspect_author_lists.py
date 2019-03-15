@@ -55,9 +55,11 @@ def dump_suspect_author_lists(file_path=None, max_author_length=3799,
     print('Done, %s suspect entries found.' % len(rows))
 
     # Write the output file.
-    if file_path is not None:
-        col_names = ['Handle', 'Errors', 'Num. Authors', 'Author list']
-        dump_excel_table(file_path, 'Suspect author lists', col_names, rows)
+    table = ExcelTableDump()
+    col_names = ['Handle', 'Errors', 'Num. Authors', 'Author list']
+    table.add_worksheet('Lista autori sospetta', col_names, rows)
+    table.write(file_path)
+
 
 
 if __name__ == '__main__':

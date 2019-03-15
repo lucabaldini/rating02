@@ -40,10 +40,12 @@ def dump_missing_doi(file_path=None):
     print('Done, %s suspect entries found.' % len(rows))
 
     # Write the output file.
-    if file_path is not None:
-        col_names = ['Handle', 'Author', 'Title', 'Journal', 'Year',
-                     'Impact factor']
-        dump_excel_table(file_path, 'Missing DOI', col_names, rows)
+    table = ExcelTableDump()
+    col_names = ['Handle', 'Type', 'Author', 'Title', 'Journal', 'Year',
+                 'Impact factor']
+    table.add_worksheet('DOI mancanti', col_names, rows)
+    table.write(file_path)
+
 
 
 if __name__ == '__main__':

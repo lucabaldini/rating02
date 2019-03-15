@@ -38,11 +38,11 @@ def dump_doi_duplicates(file_path=None):
         if doi is not None:
             handle = prod.handle
             label = '%s @ row %d.' % (prod.author(), prod.row_index)
-            if handle_dict.has_key(handle):
+            if handle in handle_dict:
                 handle_dict[handle].append(label)
             else:
                 handle_dict[handle] = [label]
-            if doi_dict.has_key(doi):
+            if doi in doi_dict:
                 try:
                     assert handle in doi_dict[doi]
                 except AssertionError:
@@ -55,16 +55,17 @@ def dump_doi_duplicates(file_path=None):
     print('%d error(s) found.' % num_errors)
 
     # Write the output file.
-    if file_path is not None:
-        col_names = ['DOI', 'Handle 1', 'Handle 2', 'Handle 3', 'Handle 4']
-        rows = []
-        for i, doi in enumerate(error_doi_list):
-            row = [doi]
-            for col, value in enumerate(doi_dict[doi]):
-                value = '%s %s' % (value, handle_dict[value])
-                row.append(value)
-            rows.append(row)
-        dump_excel_table(file_path, 'DOI duplicates', col_names, rows)
+    table = ExcelTableDump()
+    col_names = ['DOI', 'Handle 1', 'Handle 2', 'Handle 3', 'Handle 4']
+    rows = []
+    for i, doi in enumerate(error_doi_list):
+        row = [doi]
+        for col, value in enumerate(doi_dict[doi]):
+            value = '%s %s' % (value, handle_dict[value])
+            row.append(value)
+        rows.append(row)
+    table.add_worksheet('DOI duplicati', col_names, rows)
+    table.write(file_path)
         
 
 
