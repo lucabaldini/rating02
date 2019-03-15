@@ -551,12 +551,17 @@ def print_info():
     db_prod = load_db_prod()
     db_pers = load_db_pers()
     vals = db_prod.unique_values('pub_type')
-    books = db_prod.select(pub_type='3.1 Monografia o trattato scientifico')
-    for book in books:
-        print(book)
-    others = db_prod.select(pub_type='5.12 Altro')
-    for item in others:
-        print(item)
+    for pub_type in ['1.2 Recensione in rivista',
+                     '1.6 Traduzione in rivista',
+                     '3.1 Monografia o trattato scientifico',
+                     '3.8 Traduzione di libro',
+                     '5.12 Altro',
+                     '6.1 Brevetto',
+                     '7.1 Curatela']:
+        prods = db_prod.select(pub_type=pub_type, quiet=True)
+        print(pub_type)
+        for prod in prods:
+            print(prod)
     print()
     print('Total number of docents: %d' % len(db_pers))
     sub_areas = sorted(Product.SUB_AREA_DICT.keys())
