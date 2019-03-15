@@ -55,10 +55,14 @@ def dump_rating(file_path, collab_threshold=50):
             # Update the Docent object.
             pers.rating = rating
             pers.num_products = len(prods)
-            pers.num_collab_products = (num_authors > collab_threshold).sum()
-            pers.min_num_authors = num_authors.min()
-            pers.mean_num_authors = num_authors.mean()
-            pers.max_num_authors = num_authors.max()
+            # Note that we're casting all the numpy scalars to native Python
+            # types for the excel interface module to be able to write them in
+            # the output file.
+            pers.num_collab_products = \
+                int((num_authors > collab_threshold).sum())
+            pers.min_num_authors = int(num_authors.min())
+            pers.mean_num_authors = float(num_authors.mean())
+            pers.max_num_authors = int(num_authors.max())
 
 
     print('Sorting docents within sub-areas...')

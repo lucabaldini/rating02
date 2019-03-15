@@ -24,12 +24,6 @@ import xlrd
 import xlwt
 
 
-def encode_ascii(unicode_string):
-    """Encode a unicode string to ascii.
-    """
-    return unicode_string.encode('ascii', 'replace').replace('\n', '')
-
-
 def dump_excel_table(file_path, worksheet_name, col_names, rows):
     """TODO: remove me in favor of the class ExcelTableDump.
     """
@@ -65,13 +59,27 @@ class DatabaseEntry(object):
         self.__setattr__('row_index', row_index)
         for (attr, col) in self.FIELD_DICT.items():
             val = row[col].value
+            # If the column needs to be casted to a specific type, go ahead
+            # and do it.
             try:
                 val = self.FORMAT_DICT[attr](val)
+            # Here we basically have two different kinds of exceptions:
+            # - KeyError, if the column does not need to be casted;
+            # - ValueError, if the actual value cannot be converted.
+            # In both cases we take the string with minimal formatting.
             except:
-                val = encode_ascii(val)
-            if not val:
+                val = self.format_string(val)
+            # And if we're left with an empty string, we manually set the
+            # field value to None.
+            if val == '':
                 val = None
             self.__setattr__(attr, val)
+
+    @classmethod
+    def format_string(self, string):
+        """Format a generic string for later use.
+        """
+        return string.replace('\n', '')
 
 
 
@@ -437,8 +445,40 @@ class Docent(DatabaseEntry):
 
     def __cmp__(self, other):
         """Comparison operator (for sorting the database).
+
+        This is the old, Python-2 style implementation.
         """
         return cmp(self.rating, other.rating)
+
+    def __eq__(self, other):
+        """Overloaded operator for "rich-style" Python 3 comparison.
+        """
+        return (self.rating == other.rating)
+
+    def __ne__(self, other):
+        """Overloaded operator for "rich-style" Python 3 comparison.
+        """
+        return (self.rating != other.rating)
+
+    def __lt__(self, other):
+        """Overloaded operator for "rich-style" Python 3 comparison.
+        """
+        return (self.rating < other.rating)
+
+    def __le__(self, other):
+        """Overloaded operator for "rich-style" Python 3 comparison.
+        """
+        return (self.rating <= other.rating)
+
+    def __gt__(self, other):
+        """Overloaded operator for "rich-style" Python 3 comparison.
+        """
+        return (self.rating > other.rating)
+
+    def __ge__(self, other):
+        """Overloaded operator for "rich-style" Python 3 comparison.
+        """
+        return (self.rating >= other.rating)
 
     def __str__(self):
         """String formatting.
