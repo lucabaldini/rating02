@@ -398,7 +398,9 @@ class ProductDatabase(Database):
                 val_dict[val] += 1
             else:
                 val_dict[val] = 1
-        keys = val_dict.keys()
+        # Need to convert to a list since in Python 3 dict.keys() is returning
+        # a dict_keys object.
+        keys = list(val_dict.keys())
         keys.sort()
         num_prods = sum(val_dict.values())
         num_keys = len(keys)
