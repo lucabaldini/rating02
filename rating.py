@@ -26,6 +26,7 @@ import xlwt
 
 DB_PROD_FILE_PATH = 'db_prodotti.xlsx'
 DB_PERS_FILE_PATH = 'db_docenti.xlsx'
+JOURNAL_IF_PICKLE_FILE_PATH = 'journal_if.pickle'
 
 
 class DatabaseEntry(object):
@@ -166,6 +167,8 @@ class Product(DatabaseEntry):
         'wos_j5yif'     : 129
     }
 
+    IF_FIELD = 'wos_j5yif'
+
     FORMAT_DICT = {
         'year'          : int,
         'num_authors'   : int,
@@ -185,10 +188,10 @@ class Product(DatabaseEntry):
         'c'             : 0.5
     }
 
-    def __init__(self, row, row_number):
+    def __init__(self, row, row_index):
         """Overloaded constructor.
         """
-        DatabaseEntry.__init__(self, row, row_number)
+        DatabaseEntry.__init__(self, row, row_index)
         # This is needed to match publications by name when dumping the rate,
         # since the person database only has a field with the full name.
         self.author_full_name = '%s %s' %\
@@ -223,7 +226,7 @@ class Product(DatabaseEntry):
     def impact_factor(self):
         """Return the impact factor of the jornal.
         """
-        return self.wos_j5yif
+        return self.__getattribute__(self.IF_FIELD)
 
     def write(self, worksheet, row):
         """Write the basic article info to a worksheet.
@@ -421,10 +424,10 @@ class Docent(DatabaseEntry):
     }
 
 
-    def __init__(self, row, row_number):
+    def __init__(self, row, row_index):
         """Overloaded constructor.
         """
-        DatabaseEntry.__init__(self, row, row_number)
+        DatabaseEntry.__init__(self, row, row_index)
 
     def __cmp__(self, other):
         """Comparison operator (for sorting the database).
@@ -514,10 +517,25 @@ class ExcelTableDump:
     
         
 
-def load_db_prod():
+def load_db_prod(fill_missing_if=True):
     """Load the publication list from the excel file.
     """
-    return ProductDatabase(DB_PROD_FILE_PATH)
+    db = ProductDatabase(DB_PROD_FILE_PATH)
+    #if fill_missing_if:
+    #    print('Loading pickled impact factor lookup table from %s...' %\
+    #          JOURNAL_IF_PICKLE_FILE_PATH)
+    #    if_dict = pickle.load(open(JOURNAL_IF_PICKLE_FILE_PATH, 'rb'))
+    #    for prod in db:
+    #        if prod.pub_type == '1.1 Articolo in rivista' and\
+    #           prod.impact_factor() is None:
+    #            try:
+    #                impact_factor = if_dict[prod.journal][prod.year]
+    #                print('Setting IF for product at row %d to %.3f' %\
+    #                      (prod.row_index, impact_factor))
+    #                prod.__setattribute__(prod.IF_FIELD, impact_factor)
+    #            except:
+    #                print('Cannot read impact factor for %s...' % prod)
+    return db
 
 
 
