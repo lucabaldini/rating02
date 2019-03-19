@@ -31,23 +31,40 @@ def dump_journal_if(file_path):
 
     # Book-keeping dictionary.
     if_dict = {}
+    noif_dict = {}
 
     # Loop over the journals.
     print('Looping over the products...')
     for prod in db:
-        impact_factor = prod.impact_factor()
-        if impact_factor is None:
-            continue
         journal = prod.journal
         year = prod.year
-        if journal in if_dict:
-            if year in if_dict[journal]:
-                assert impact_factor == if_dict[journal][year]
+        impact_factor = prod.impact_factor()
+        if impact_factor is None:
+            if journal in noif_dict:
+                if year in noif_dict[journal]:
+                    noif_dict[journal][year] += 1
+                else:
+                    noif_dict[journal][year] = 1
             else:
-                if_dict[journal][year] = impact_factor
+                noif_dict[journal] = {year: 1}
         else:
-            if_dict[journal] = {year: impact_factor}
+            if journal in if_dict:
+                if year in if_dict[journal]:
+                    assert impact_factor == if_dict[journal][year]
+                else:
+                    if_dict[journal][year] = impact_factor
+            else:
+                if_dict[journal] = {year: impact_factor}
     print('Done, IF for %d journal(s) written.' % len(if_dict))
+
+    print(if_dict)
+    print()
+    for journal in sorted(noif_dict.keys()):
+        n = sum(noif_dict[journal].values())
+        if n > 3:
+            print('[%3d] %s %s' % (n, journal, noif_dict[journal]))
+            if journal in if_dict:
+                print('  --> %s' % if_dict[journal])
 
     # Dump the dictionary to a pickle file.
     print('Dumping the IF dict to %s...' % file_path)
