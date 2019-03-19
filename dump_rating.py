@@ -51,13 +51,24 @@ def dump_rating(file_path, collab_threshold=50):
     db_pers = load_db_pers()
     sub_areas = sorted(Product.SUB_AREA_DICT.keys())
 
-    # First loop over the products, where we mark the invalid as such.
+    # First loop over the products, where we mark the invalid as such, and
+    # we manually set the journal impact factor where necessary.
     print('Post-processing product list...')
     for prod in db_prod:
+        # Mark invalids.
         if prod.row_index in _rating.INVALID:
             print('Marking product @ row %d for %s as invalid...' %\
                   (prod.row_index, prod.author_surname))
             prod.valid = False
+        # Set impact factor if necessary.
+        if prod.pub_type == '1.1 Articolo in rivista' and \
+           prod.impact_factor() is None and \
+           prod.journal in _rating.IMPACT_FACTOR_DICT.keys():
+            journal = prod.journal
+            impact_factor = _rating.IMPACT_FACTOR_DICT[journal]
+            print('Setting IF for %s @ row %d to %.3f...' %\
+                  (journal, prod.row_index, impact_factor))
+            prod.set_impact_factor(impact_factor)
 
     # Break out the docent database into the three sub-areas.
     # Mind at this points the sub-lists still contain the persons with less

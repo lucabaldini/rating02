@@ -521,49 +521,10 @@ class ExcelTableDump:
     
         
 
-def load_db_prod(fill_missing_if=True):
+def load_db_prod():
     """Load the publication list from the excel file.
     """
-    db = ProductDatabase(DB_PROD_FILE_PATH)
-    if fill_missing_if:
-        if_dict = {
-            'ASTRONOMY & ASTROPHYSICS': 4.5,
-            'JOURNAL OF HIGH ENERGY PHYSICS': 4.8,
-            'PHYSICAL REVIEW LETTERS': 8.0,
-            'PHYSICAL REVIEW A': 2.7,
-            'PHYSICAL REVIEW. A': 2.7,
-            'PHYSICAL REVIEW B': 3.8,
-            'PHYSICAL REVIEW. B': 3.8,
-            'PHYSICAL REVIEW. B, CONDENSED MATTER AND MATERIALS PHYSICS': 3.8,
-            'PHYSICAL REVIEW C': 3.3,
-            'PHYSICAL REVIEW. C': 3.3,
-            'PHYSICAL REVIEW. C, NUCLEAR PHYSICS': 3.3,
-            'PHYSICAL REVIEW D': 4.4,
-            'PHYSICAL REVIEW. D': 4.4,
-            'PHYSICAL REVIEW D, PARTICLES, FIELDS, GRAVITATION, AND COSMOLOGY': 4.4,
-            'PHYSICAL REVIEW E': 2.4,
-            'PHYSICAL REVIEW. E': 2.4,
-            'PHYSICAL REVIEW E, STATISTICAL, NONLINEAR, AND SOFT MATTER PHYSICS' : 2.4,
-            'FRONTIERS IN PHYSICS': 2.5,
-            'THE ASTROPHYSICAL JOURNAL': 5.4,
-            'MONTHLY NOTICES OF THE ROYAL ASTRONOMICAL SOCIETY. LETTERS': 4.9,
-            'MONTHLY NOTICES OF THE ROYAL ASTRONOMICAL SOCIETY': 4.9,
-            'IEEE TRANSACTIONS ON RADIATION AND PLASMA MEDICAL SCIENCES': 0.,
-            'POS PROCEEDINGS OF SCIENCE': 0.,
-            'JOURNAL OF HIGH ENERGY ASTROPHYSICS (PRINT)': 2.3,
-            'NANO LETTERS': 12.1,
-            'NANOTECHNOLOGY': 3.4,
-            'NATURE PHYSICS': 22.8
-        }
-        for prod in db:
-            if prod.pub_type == '1.1 Articolo in rivista' and \
-               prod.impact_factor() is None and prod.journal in if_dict.keys():
-                journal = prod.journal
-                impact_factor = if_dict[journal]
-                print('Setting IF for %s @ row %d to %.3f...' %\
-                      (journal, prod.row_index, impact_factor))
-                prod.set_impact_factor(impact_factor)
-    return db
+    return ProductDatabase(DB_PROD_FILE_PATH)
 
 
 

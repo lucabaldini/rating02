@@ -27,7 +27,7 @@ def dump_journal_if(file_path):
     This can potentuially be used to fill in the gaps for the database entries
     where the impact factor is missing for unknown reasons.
     """
-    db = load_db_prod(False).select(pub_type='1.1 Articolo in rivista')
+    db = load_db_prod().select(pub_type='1.1 Articolo in rivista')
 
     # Book-keeping dictionary.
     if_dict = {}
