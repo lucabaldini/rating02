@@ -27,6 +27,18 @@ TOTAL_RATING_POINTS = 188
 RATING_POINTS_PER_DOCENT = TOTAL_RATING_POINTS / 74.
 
 
+"""
+"""
+LOA_SCALING_DICT = {
+    # 152 + 137 gg
+    'CIAMPINI DONATELLA': 1.247,
+    # 137 gg?
+    'ROCCATAGLIATA VERONICA': 1.103,
+    # 45 gg?
+    'LEPORINI DINO': 1.032
+}
+
+
 """Dictionary of the impact factors for some of the journals that got left
 behind in the db file.
 """

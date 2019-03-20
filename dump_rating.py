@@ -86,6 +86,13 @@ def dump_rating(file_path, collab_threshold=50):
             prods = db_prod.select(author_full_name=pers.full_name, valid=True)
             rating = sum(prod.rating_points(sub_area, _rating.RATING_DICT) for\
                          prod in prods)
+
+            # Take any leave of absence into account.
+            if pers.full_name in _rating.LOA_SCALING_DICT:
+                scale = _rating.LOA_SCALING_DICT[pers.full_name]
+                print('Scaling rating for %s by %.3f' % (pers.full_name, scale))
+                rating *= scale
+            
             num_authors = numpy.array([prod.num_authors for prod in prods])
             # Update the Docent object.
             pers.rating = rating
