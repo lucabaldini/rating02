@@ -43,7 +43,7 @@ def filter_db_pers(db_pers):
     return db
 
 
-def dump_rating(file_path, collab_threshold=50):
+def dump_rating(file_path, collab_threshold=30):
     """Dump the full rating information.
     """
     # Load the underlying database objects.
@@ -103,7 +103,7 @@ def dump_rating(file_path, collab_threshold=50):
             pers.num_collab_products = \
                 int((num_authors > collab_threshold).sum())
             pers.min_num_authors = int(num_authors.min())
-            pers.mean_num_authors = float(num_authors.mean())
+            pers.median_num_authors = float(numpy.median(num_authors))
             pers.max_num_authors = int(num_authors.max())
 
     # Now that we have the basic product statistics we can filter out
@@ -128,7 +128,7 @@ def dump_rating(file_path, collab_threshold=50):
                   (i, pers.full_name, pers.rating))
             rows.append([i, pers.full_name, pers.rating, pers.num_products,
                          pers.num_collab_products, pers.min_num_authors,
-                         pers.mean_num_authors, pers.max_num_authors])
+                         pers.median_num_authors, pers.max_num_authors])
         table.add_worksheet('Sottoarea %s' % sub_area, col_names, rows)
     table.write(file_path)
 
@@ -152,9 +152,9 @@ def dump_rating(file_path, collab_threshold=50):
                 name += ' %s' % pers.full_name.split()[1].title()
             txt = '%s, %d (%d) <%.1f>' %\
                 (name, pers.num_products, pers.num_collab_products,
-                 pers.mean_num_authors)
+                 pers.median_num_authors)
             plt.text(x, y, txt, rotation=20., ha='left', va='bottom')
-        leg = 'Cognome, # prod (# prod > %d auth) <mean # auth>' %\
+        leg = 'Cognome, # prod (# prod > %d auth) <median # auth>' %\
             (collab_threshold)
         plt.text(0.5, 0.9, leg, transform=plt.gca().transAxes, size=12)
 
