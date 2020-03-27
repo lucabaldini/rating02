@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 from rating import *
 
-import _rating2018 as _rating
+import _rating2020 as _rating
 
 
 def filter_db_pers(db_pers):
@@ -30,7 +30,7 @@ def filter_db_pers(db_pers):
     less than 2 products (which automatically get 0 rating points).
 
     Note that, for the thing to work, this has to be called after a loop
-    over the db where the product statistics has been calculated and 
+    over the db where the product statistics has been calculated and
     updated.
     """
     db = DocentDatabase()
@@ -92,7 +92,7 @@ def dump_rating(file_path, collab_threshold=30):
                 scale = _rating.LOA_SCALING_DICT[pers.full_name]
                 print('Scaling rating for %s by %.3f' % (pers.full_name, scale))
                 rating *= scale
-            
+
             num_authors = numpy.array([prod.num_authors for prod in prods])
             # Update the Docent object.
             pers.rating = rating
@@ -177,9 +177,9 @@ def dump_rating(file_path, collab_threshold=30):
             plt.text(r.mean(), 2, '%d x %d = %d (%.1f %%)' %\
                      (p, n, n * p, 100. * frac), ha='center')
         print('Total rating points for area %s: %d' % (sub_area, psum))
-        plt.savefig('rating02_2018_%s.png' % sub_area)        
+        plt.savefig('rating02_2020_%s.png' % sub_area)
     plt.show()
 
 
 if __name__ == '__main__':
-    dump_rating('rating02_2018.xls')
+    dump_rating('rating02_2020.xls')

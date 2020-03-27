@@ -35,7 +35,7 @@ class DatabaseEntry(object):
 
     """Base class describing a database entry.
     """
-    
+
     def __init__(self, row, row_index):
         """Constructor from a row of an excel file.
         """
@@ -88,7 +88,7 @@ class Database(list):
     """
 
     def __init__(self, file_path=None, sheet_index=0):
-        """Constructor.        
+        """Constructor.
         """
         list.__init__(self)
         # If file_path is None create an empty database (this is used for
@@ -156,14 +156,14 @@ class Product(DatabaseEntry):
         'pub_type'      : 3,
         'author_name'   : 7,
         'author_surname': 8,
-        'author_string' : 30,
-        'num_authors'   : 31,
-        'doi'           : 38,
-        'isbn'          : 40,
-        'volume'        : 64,
-        'journal'       : 54,
-        'wos_jif'       : 124,
-        'wos_j5yif'     : 129
+        'author_string' : 37,
+        'num_authors'   : 38,
+        'doi'           : 45,
+        'isbn'          : 47,
+        'journal'       : 61,
+        'volume'        : 71,
+        'wos_jif'       : 89,
+        'wos_j5yif'     : 89
     }
 
     IF_FIELD = 'wos_j5yif'
@@ -262,7 +262,7 @@ class Product(DatabaseEntry):
         Mind this is the main function encapsulating all the logic for the
         rating evaluation.
 
-        Since the rating cannot be calculated programmatically for all 
+        Since the rating cannot be calculated programmatically for all
         products, and ultimatly a human decision is needed in some cases,
         a generic lookup table indexed by the unique handle of the product
         can be optionally passed as an argument, in which case the table
@@ -299,7 +299,7 @@ class Product(DatabaseEntry):
                 w = 1.3
             return self._weight_to_rating_points(w, sub_area)
 
-        # Proceedings? (Second most common case.) 
+        # Proceedings? (Second most common case.)
         if pub_type == '4.1 Contributo in Atti di convegno':
             if impact_factor is None:
                 w = 0.
@@ -321,7 +321,7 @@ class Product(DatabaseEntry):
         if pub_type in zero_types:
             return 0.
 
-        sys.exit('Cannot rate handle %s, %s, %d author(s), IF = %s...' %\
+        sys.exit('Error: cannot rate handle %s, %s, %d author(s), IF = %s...' %\
                  (self.handle, self, self.num_authors, self.impact_factor()))
         return 0
 
@@ -477,7 +477,7 @@ class Docent(DatabaseEntry):
             (self.full_name, self.role, self.sub_area)
 
 
-    
+
 class DocentDatabase(Database):
 
     """Class representing the person database.
@@ -493,7 +493,7 @@ class DocentDatabase(Database):
 
 class ExcelTableDump:
 
-    """Convenience class describing a table to be written in an output 
+    """Convenience class describing a table to be written in an output
     excel file.
     """
 
@@ -518,8 +518,8 @@ class ExcelTableDump:
         print('Writing table dump to %s...' % file_path)
         self.workbook.save(file_path)
         print('Done.')
-    
-        
+
+
 
 def load_db_prod():
     """Load the publication list from the excel file.
