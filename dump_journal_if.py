@@ -56,15 +56,18 @@ def dump_journal_if(file_path):
             else:
                 if_dict[journal] = {year: impact_factor}
     print('Done, IF for %d journal(s) written.' % len(if_dict))
+    keys = list(if_dict.keys())
+    keys.sort()
+    for key in keys:
+        print('---%s -> %s' % (key, if_dict[key]))
 
-    print(if_dict)
     print()
     for journal in sorted(noif_dict.keys()):
         n = sum(noif_dict[journal].values())
-        if n > 3:
+        if n > 0:
             print('[%3d] %s %s' % (n, journal, noif_dict[journal]))
             if journal in if_dict:
-                print('  --> %s' % if_dict[journal])
+                print('  --> otherwise rated as %s' % if_dict[journal])
 
     # Dump the dictionary to a pickle file.
     print('Dumping the IF dict to %s...' % file_path)
