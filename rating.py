@@ -162,8 +162,8 @@ class Product(DatabaseEntry):
         'isbn'          : 47,
         'journal'       : 61,
         'volume'        : 71,
-        'wos_jif'       : 89,
-        'wos_j5yif'     : 89
+        'wos_jif'       : 123,
+        'wos_j5yif'     : 124
     }
 
     IF_FIELD = 'wos_j5yif'
@@ -315,7 +315,8 @@ class Product(DatabaseEntry):
                 return self._weight_to_rating_points(0.6, sub_area)
 
         # Now a whole bunch of categories totaling zero rating points.
-        zero_types = ['1.5 Abstract in rivista', '1.6 Traduzione in rivista',
+        zero_types = ['1.2 Recensione in rivista', '1.5 Abstract in rivista',
+                      '1.6 Traduzione in rivista',
                       '2.2 Prefazione/Postfazione', '2.3 Breve introduzione',
                       '4.2 Abstract in Atti di convegno', '4.3 Poster']
         if pub_type in zero_types:
@@ -417,10 +418,10 @@ class Docent(DatabaseEntry):
     """
 
     FIELD_DICT = {
-        'identifier'    : 0,
-        'full_name'     : 1,
+        'identifier'    : 1,
+        'full_name'     : 2,
         'role'          : 3,
-        'sub_area'      : 14
+        'sub_area'      : 12
     }
 
     FORMAT_DICT = {
@@ -473,8 +474,8 @@ class Docent(DatabaseEntry):
     def __str__(self):
         """String formatting.
         """
-        return '%s (%s, sub-area %s)' %\
-            (self.full_name, self.role, self.sub_area)
+        return '%s (sub-area %s)' %\
+            (self.full_name, self.sub_area)
 
 
 

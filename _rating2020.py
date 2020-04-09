@@ -20,11 +20,11 @@
 """Total number of rating points to be assigned.
 """
 TOTAL_RATING_POINTS = 188
-
+NUM_DOCENTS = 76
 
 """Average number of rating points per docent.
 """
-RATING_POINTS_PER_DOCENT = TOTAL_RATING_POINTS / 74.
+RATING_POINTS_PER_DOCENT = TOTAL_RATING_POINTS / float(NUM_DOCENTS)
 
 
 """

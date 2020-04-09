@@ -84,6 +84,9 @@ def dump_rating(file_path, collab_threshold=30):
     for sub_area in sub_areas:
         for pers in pers_dict[sub_area]:
             prods = db_prod.select(author_full_name=pers.full_name, valid=True)
+            pers.num_products = len(prods)
+            if len(prods) == 0:
+                continue
             rating = sum(prod.rating_points(sub_area, _rating.RATING_DICT) for\
                          prod in prods)
 
@@ -96,7 +99,6 @@ def dump_rating(file_path, collab_threshold=30):
             num_authors = numpy.array([prod.num_authors for prod in prods])
             # Update the Docent object.
             pers.rating = rating
-            pers.num_products = len(prods)
             # Note that we're casting all the numpy scalars to native Python
             # types for the excel interface module to be able to write them in
             # the output file.
