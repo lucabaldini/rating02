@@ -18,24 +18,31 @@
 
 
 """Total number of rating points to be assigned.
+
+Technically we have 76 professors and 190 points (2.5 points per persons).
+Triggiani has zero products and therefore gets zero points---and we loose his
+2.5 points. It's not clear to me whether this brings us down to 188 or 187, and
+for the time being I am conservatively assuming 187.
 """
-TOTAL_RATING_POINTS = 188
-NUM_DOCENTS = 76
+TOTAL_RATING_POINTS = 187
+NUM_DOCENTS = 75
 
 """Average number of rating points per docent.
 """
 RATING_POINTS_PER_DOCENT = TOTAL_RATING_POINTS / float(NUM_DOCENTS)
 
+"""Docents with zero products. (I realize the variable name is somewhat
+dismissive, but I didn't mean to be judjamental.)
+"""
+ZERO_DOCENTS = ['TRIGGIANI GIUSEPPE']
 
 """
 """
 LOA_SCALING_DICT = {
-    # 152 + 137 gg
-    'CIAMPINI DONATELLA': 1.247,
-    # 159 + 45 (PT) + 94 (malattia) gg
-    'ROCCATAGLIATA VERONICA': 1.256,
-    # 47 gg
-    'LEPORINI DINO': 1.033
+    # 152 + 137 + 45 gg
+    'CIAMPINI DONATELLA': 1.229,
+    # 91 + 153 gg
+    'ROCCATAGLIATA VERONICA': 1.167
 }
 
 

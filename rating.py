@@ -23,6 +23,8 @@ import pickle
 import xlrd
 import xlwt
 
+from _rating2020 import ZERO_DOCENTS
+
 
 DB_PROD_FILE_PATH = 'db_prodotti.xlsx'
 DB_PERS_FILE_PATH = 'db_docenti.xlsx'
@@ -489,7 +491,10 @@ class DocentDatabase(Database):
         """
         for i in range(1, sheet.nrows):
             pers = Docent(sheet.row(i), i + 1)
-            self.append(pers)
+            if pers.full_name in ZERO_DOCENTS:
+                print('Skipping %s with no products' % pers)
+            else:
+                self.append(pers)
 
 
 class ExcelTableDump:
