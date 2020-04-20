@@ -64,7 +64,7 @@ def dump_journal_if(file_path):
     print()
     for journal in sorted(noif_dict.keys()):
         n = sum(noif_dict[journal].values())
-        if n > 0:
+        if n > 2:
             print('[%3d] %s %s' % (n, journal, noif_dict[journal]))
             if journal in if_dict:
                 print('  --> otherwise rated as %s' % if_dict[journal])
