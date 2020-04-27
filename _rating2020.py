@@ -242,11 +242,11 @@ RATING_DICT = {
     # Brevetto Bisogni, Morrocchi Sportelli.
     # [6.1  @ row 340 for BISOGNI, M.], "Metodo e apparato per l'acquisizione
     # dati per tomografia ad emissione di positroni in adroterapia a fascio acceso" (2018)
-    '11568/1013900': 0.,
+    '11568/1013900': 4.16,
 
     # Recensione in rivista Roddaro.
     '11568/1017473': 0.,
 
     # 3.1  @ row 996 for CHIOFALO, M.], "La Fisica della Materia" (2019)
-    '11568/1028007': 0.
+    '11568/1028007': 2.
 }
