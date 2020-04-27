@@ -551,6 +551,7 @@ def print_info():
                      '1.6 Traduzione in rivista',
                      '3.1 Monografia o trattato scientifico',
                      '3.8 Traduzione di libro',
+                     '5.11 Software',
                      '5.12 Altro',
                      '6.1 Brevetto',
                      '7.1 Curatela']:
@@ -558,6 +559,7 @@ def print_info():
         print(pub_type)
         for prod in prods:
             print(prod)
+            print(prod.handle)
     print()
     print('Total number of docents: %d' % len(db_pers))
     sub_areas = sorted(Product.SUB_AREA_DICT.keys())
